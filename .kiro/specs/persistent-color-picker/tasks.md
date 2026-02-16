@@ -21,14 +21,14 @@ This implementation plan transforms the existing Electron color picker into a pe
   - Update tray creation to use correct icon path based on platform
   - _Requirements: 1.1, 7.2_
 
-- [ ] 3. Integrate system tray into main process lifecycle
-  - [ ] 3.1 Modify `electron/main.ts` to import and initialize tray manager
+- [x] 3. Integrate system tray into main process lifecycle
+  - [x] 3.1 Modify `electron/main.ts` to import and initialize tray manager
     - Import `createTray` and `destroyTray` from tray module
     - Call `createTray()` in `app.whenReady()` handler before creating explore window
     - Add tray cleanup in `app.on('before-quit')` handler
     - _Requirements: 1.1, 1.5_
   
-  - [ ] 3.2 Connect tray menu actions to existing window functions
+  - [x] 3.2 Connect tray menu actions to existing window functions
     - Wire "Start Capture" menu item to call `hideExploreWindow()` and `createCaptureWindow()`
     - Wire "Show Window" menu item to call `showExploreWindow()`
     - Wire "Quit" menu item to call `app.quit()`
