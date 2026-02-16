@@ -8,8 +8,10 @@ import {
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
 import { captureScreen, copyToClipboard } from './capture';
+import { createTray, destroyTray } from './tray';
 
 app.whenReady().then(() => {
+  createTray();
   registerGlobalShortcuts();
   createExploreWindow();
 
@@ -26,6 +28,10 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   unregisterGlobalShortcuts();
+});
+
+app.on('before-quit', () => {
+  destroyTray();
 });
 
 // IPC handlers
