@@ -1,0 +1,83 @@
+Color Picker Project Structure
+================================
+
+color-picker/
+│
+├── 📄 Configuration Files
+│   ├── package.json                 (Dependencies & scripts)
+│   ├── tsconfig.json                (TypeScript config - React)
+│   ├── tsconfig.electron.json       (TypeScript config - Electron)
+│   ├── tsconfig.node.json           (TypeScript config - Vite)
+│   ├── vite.config.ts               (Vite build configuration)
+│   ├── tailwind.config.ts           (Tailwind CSS config)
+│   ├── postcss.config.js            (PostCSS config)
+│   ├── electron-builder.json        (Build/package config)
+│   ├── .gitignore                   (Git exclusions)
+│   └── start.sh                     (Development startup script)
+│
+├── 📄 HTML Entry Point
+│   └── index.html                   (Main HTML file)
+│
+├── 📁 electron/                     (Main Process - Node.js)
+│   ├── main.ts                      (Entry point, IPC handlers)
+│   ├── windows.ts                   (Window management)
+│   ├── shortcuts.ts                 (Global keyboard shortcuts)
+│   └── capture.ts                   (Screen capture & clipboard)
+│
+├── 📁 preload/                      (Security Bridge)
+│   └── index.ts                     (contextBridge API)
+│
+├── 📁 src/                          (React Application)
+│   ├── main.tsx                     (React entry point)
+│   ├── app.tsx                      (Router component)
+│   ├── index.css                    (Global CSS + Tailwind)
+│   ├── global.d.ts                  (TypeScript declarations)
+│   │
+│   ├── 📁 screens/                  (Main UI Screens)
+│   │   ├── Explore.tsx              (Control window UI)
+│   │   └── Capture.tsx              (Fullscreen picker UI)
+│   │
+│   ├── 📁 components/               (Reusable Components)
+│   │   └── Magnifier.tsx            (Canvas magnifier)
+│   │
+│   ├── 📁 shared/                   (Utilities)
+│   │   └── color.ts                 (Color conversion utils)
+│   │
+│   └── 📁 styles/                   (CSS Files)
+│       └── glass.css                (Glassmorphism effects)
+│
+└── 📁 Documentation
+    ├── README.md                    (Quick start & overview)
+    ├── USAGE_GUIDE.md               (Detailed usage guide)
+    ├── QUICK_REFERENCE.md           (Command cheat sheet)
+    ├── ARCHITECTURE.md              (System architecture)
+    ├── PROJECT_SUMMARY.md           (Specification compliance)
+    ├── DIRECTORY_STRUCTURE.txt      (This file)
+    └── FILE_LIST.txt                (Complete file listing)
+
+Total Files: 31
+├── Code Files: 21
+├── Config Files: 10
+├── Documentation: 7
+└── Scripts: 1
+
+Key Technologies:
+- Electron 28.0.0 (Desktop framework)
+- React 18.2.0 (UI library)
+- TypeScript 5.3.3 (Type safety)
+- Vite 5.0.8 (Build tool)
+- TailwindCSS 3.3.6 (Styling)
+
+Security Features:
+✓ contextBridge (Secure IPC)
+✓ Context Isolation (Enabled)
+✓ Node Integration (Disabled)
+✓ Preload Script (Limited API)
+
+Main Features:
+✓ Global Shortcut (Ctrl+Shift+C)
+✓ Canvas Magnifier (7x7 grid)
+✓ Screen Capture (Desktop API)
+✓ Clipboard Copy (Auto HEX)
+✓ Glassmorphism UI
+✓ Instant Feedback (150ms)

@@ -1,0 +1,26 @@
+.glass {
+    background: linear-gradient(
+        to bottom right,
+        rgba(59, 130, 246, 0.5),
+        rgba(147, 51, 234, 0.6)
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.pipette-cursor {
+    cursor:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 16v4h-4M4 8V4h4M16 4L4 16M8 20l12-12"/></svg>')
+            0 24,
+        crosshair;
+}
