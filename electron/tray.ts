@@ -1,5 +1,6 @@
 import { Tray, Menu, nativeImage, app } from 'electron';
 import path from 'path';
+import { hideExploreWindow, createCaptureWindow, showExploreWindow } from './windows';
 
 let tray: Tray | null = null;
 
@@ -22,30 +23,28 @@ function getTrayIconPath(): string {
 }
 
 /**
- * Placeholder handler for Start Capture menu item
- * Will be connected to actual capture functionality in later tasks
+ * Handler for Start Capture menu item
+ * Hides the explore window and creates the capture window
  */
 function handleStartCapture(): void {
-  console.log('Start Capture clicked - to be implemented');
-  // TODO: Connect to hideExploreWindow() and createCaptureWindow()
+  hideExploreWindow();
+  createCaptureWindow();
 }
 
 /**
- * Placeholder handler for Show Window menu item
- * Will be connected to actual window management in later tasks
+ * Handler for Show Window menu item
+ * Shows the explore window
  */
 function handleShowWindow(): void {
-  console.log('Show Window clicked - to be implemented');
-  // TODO: Connect to showExploreWindow()
+  showExploreWindow();
 }
 
 /**
- * Placeholder handler for Quit menu item
- * Will be connected to actual quit functionality in later tasks
+ * Handler for Quit menu item
+ * Quits the application completely
  */
 function handleQuit(): void {
-  console.log('Quit clicked - to be implemented');
-  // TODO: Connect to app.quit()
+  app.quit();
 }
 
 /**
