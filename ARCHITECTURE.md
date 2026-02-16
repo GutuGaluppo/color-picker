@@ -160,6 +160,13 @@ Closes capture window
 └─────────────────────────────────────┘
 ```
 
+## Application States
+
+1. **Background** - No windows, listens for global shortcut
+2. **Explore** - Small control window with "Start Capture" button
+3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then exits
+
 ## Component Hierarchy
 
 ```

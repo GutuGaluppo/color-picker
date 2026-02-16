@@ -52,10 +52,10 @@ npm run build
 
 ## Application States
 
-1. **Background** - App running, no windows visible
-2. **Explore Mode** - Small control window
-3. **Capture Mode** - Fullscreen color picker with magnifier
-4. **Feedback** - Brief "✓ Copied #HEX" message (150ms)
+1. **Background** - No windows, listens for global shortcut
+2. **Explore** - Small control window with "Start Capture" button
+3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then exits
 
 ## Tech Stack
 

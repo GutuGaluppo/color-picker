@@ -18,9 +18,9 @@ A production-ready desktop utility for instant color picking from anywhere on sc
 
 #### Application States ✓
 - [x] **State 0 - Background**: No windows, listens for global shortcut
-- [x] **State 1 - Explore**: Small glass window, does NOT auto-start capture
-- [x] **State 2 - Capture**: Fullscreen overlay, pipette cursor, magnifier
-- [x] **State 3 - Feedback**: "✓ Copied #HEX" for ≤150ms, immediate exit
+- [x] **State 1 - Explore**: Small control window with "Start Capture" button
+- [x] **State 2 - Capture**: Fullscreen overlay with magnifier and crosshair cursor
+- [x] **State 3 - Feedback**: Brief "✓ Copied #HEX" message (150ms) then exits
 
 #### Global Shortcut ✓
 - [x] `CommandOrControl+Shift+C` registered
