@@ -1,15 +1,6 @@
 import React from "react";
 import "../styles/glass.css";
 
-declare global {
-  interface Window {
-    electronAPI: {
-      startCapture: () => void;
-      closeExplore: () => void;
-    };
-  }
-}
-
 export const Explore: React.FC = () => {
   const handleStartCapture = () => {
     window.electronAPI.startCapture();

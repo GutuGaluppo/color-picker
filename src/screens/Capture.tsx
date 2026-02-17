@@ -2,21 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Magnifier } from "../components/Magnifier";
 import "../styles/glass.css";
 
-declare global {
-  interface Window {
-    electronAPI: {
-      captureScreen: () => Promise<{
-        dataUrl: string;
-        width: number;
-        height: number;
-      }>;
-      copyToClipboard: (text: string) => Promise<boolean>;
-      closeCapture: () => void;
-      cancelCapture: () => void;
-    };
-  }
-}
-
 export const Capture: React.FC = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [currentColor, setCurrentColor] = useState("#000000");
