@@ -5,21 +5,44 @@ import {
   closeCaptureWindow,
   hideExploreWindow,
   showExploreWindow,
-  restoreExploreWindowState
+  restoreExploreWindowState,
+  getExploreWindow
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
 import { captureScreen, copyToClipboard } from './capture';
 import { createTray, destroyTray } from './tray';
 
-app.whenReady().then(() => {
-  createTray();
-  registerGlobalShortcuts();
-  createExploreWindow();
+// Request single instance lock to prevent duplicate launches
+const gotTheLock = app.requestSingleInstanceLock();
 
-  app.on('activate', () => {
-    createExploreWindow();
+if (!gotTheLock) {
+  // Another instance is already running, quit this instance
+  app.quit();
+} else {
+  // Handle second instance launch attempts
+  app.on('second-instance', () => {
+    // Show and focus the explore window when user tries to launch again
+    const exploreWindow = getExploreWindow();
+    if (exploreWindow) {
+      if (!exploreWindow.isVisible()) {
+        showExploreWindow();
+      }
+      exploreWindow.focus();
+    } else {
+      createExploreWindow();
+    }
   });
-});
+
+  app.whenReady().then(() => {
+    createTray();
+    registerGlobalShortcuts();
+    createExploreWindow();
+
+    app.on('activate', () => {
+      createExploreWindow();
+    });
+  });
+}
 
 app.on('window-all-closed', () => {
   // Don't quit on any platform - app continues running in background with system tray

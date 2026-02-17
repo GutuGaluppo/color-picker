@@ -139,6 +139,7 @@ export function hideExploreWindow(): void {
 export function showExploreWindow(): void {
   if (exploreWindow && !exploreWindow.isDestroyed()) {
     exploreWindow.show();
+    exploreWindow.focus();
     windowState.exploreVisible = true;
   } else {
     createExploreWindow();

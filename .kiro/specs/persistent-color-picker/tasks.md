@@ -75,9 +75,9 @@ This implementation plan transforms the existing Electron color picker into a pe
 
 - [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
-
-- [ ] 7. Handle duplicate application launches
-  - [ ] 7.1 Implement second-instance detection
+  
+- [x] 7. Handle duplicate application launches
+  - [x] 7.1 Implement second-instance detection
     - Use Electron's `app.requestSingleInstanceLock()` API
     - Add handler for `second-instance` event in `electron/main.ts`
     - Show explore window when second instance is detected
