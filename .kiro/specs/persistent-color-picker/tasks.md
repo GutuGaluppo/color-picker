@@ -84,25 +84,25 @@ This implementation plan transforms the existing Electron color picker into a pe
     - Focus the window if already visible
     - _Requirements: 3.2_
   
-  - [ ]* 7.2 Write property test for duplicate launch behavior
+  - [x] 7.2 Write property test for duplicate launch behavior
     - **Property 5: Duplicate launch shows window**
     - **Validates: Requirements 3.2**
 
-- [ ] 8. Add error handling for system tray operations
-  - [ ] 8.1 Add try-catch around tray creation in `electron/main.ts`
+- [x] 8. Add error handling for system tray operations
+  - [x] 8.1 Add try-catch around tray creation in `electron/main.ts`
     - Wrap `createTray()` call in try-catch block
     - Log error with details if tray creation fails
     - Show explore window as fallback
     - Optionally add user notification about tray unavailability
     - _Requirements: 1.1_
   
-  - [ ] 8.2 Add error handling for shortcut registration in `electron/shortcuts.ts`
+  - [x] 8.2 Add error handling for shortcut registration in `electron/shortcuts.ts`
     - Check return value of `globalShortcut.register()`
     - Log warning if registration fails
     - Continue app operation without shortcut
     - _Requirements: 3.3_
   
-  - [ ] 8.3 Add error handling for screen capture in `electron/main.ts`
+  - [x] 8.3 Add error handling for screen capture in `electron/main.ts`
     - Wrap capture handler in try-catch (already exists)
     - Ensure capture window closes on error
     - Restore explore window state on error
