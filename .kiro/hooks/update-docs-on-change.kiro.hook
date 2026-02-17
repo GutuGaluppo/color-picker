@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "name": "Update Docs on Source Change",
+  "description": "Automatically prompts the agent to update README.md or other documentation when TypeScript source files, configuration files, or package files are modified",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.json",
+      "*.md",
+      "*.html",
+      "*.css",
+      "package.json",
+      "tsconfig*.json",
+      "vite.config.ts",
+      "electron-builder.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the changes made to the source files and update the relevant documentation. If the changes affect user-facing features or setup, update README.md. If the changes affect architecture or implementation details, update ARCHITECTURE.md or other relevant documentation files. Keep documentation concise and accurate."
+  }
+}
