@@ -10,6 +10,7 @@ A fast, silent, and non-intrusive desktop color picker utility built with Electr
 - 📋 **Auto-Copy** - Colors automatically copied to clipboard in HEX format
 - ⚡ **Fast & Silent** - Minimal feedback, exits immediately after capture
 - 🪟 **Frameless UI** - Clean, glassmorphism design
+- 🔄 **Background Operation** - Runs persistently in system tray until explicitly quit
 
 ## Installation
 
@@ -50,12 +51,20 @@ npm run build
 - **Click** - Capture color and copy to clipboard
 - **Escape** - Cancel capture mode
 
+### System Tray
+The app runs in the background with a system tray icon. Right-click the tray icon to:
+- **Start Capture** - Begin color picking
+- **Show Window** - Display the explore window
+- **Quit** - Exit the application
+
+Note: Closing windows does not quit the app. Use the system tray menu to quit.
+
 ## Application States
 
-1. **Background** - No windows, listens for global shortcut
+1. **Background** - No windows visible, system tray active, listens for global shortcut
 2. **Explore** - Small control window with "Start Capture" button
 3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
-4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then exits
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to background
 
 ## Tech Stack
 
@@ -74,7 +83,9 @@ color-picker/
 │   ├── main.ts        # Entry point
 │   ├── windows.ts     # Window management
 │   ├── shortcuts.ts   # Global shortcuts
-│   └── capture.ts     # Screen capture logic
+│   ├── capture.ts     # Screen capture logic
+│   ├── tray.ts        # System tray management
+│   └── assets/        # Tray and app icons
 ├── preload/           # Secure IPC bridge
 │   └── index.ts       # contextBridge API
 ├── src/               # React application

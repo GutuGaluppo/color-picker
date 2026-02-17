@@ -15,15 +15,16 @@
 │  │  │              │  │              │  │              │ │    │
 │  │  │ • App init   │  │ • Create win │  │ • Register   │ │    │
 │  │  │ • IPC server │  │ • Manage win │  │ • Ctrl+Shift │ │    │
+│  │  │ • Tray init  │  │ • Hide/Show  │  │              │ │    │
 │  │  └──────────────┘  └──────────────┘  └──────────────┘ │    │
 │  │                                                          │    │
-│  │  ┌──────────────────────────────────────────────────┐  │    │
-│  │  │             capture.ts                            │  │    │
-│  │  │                                                    │  │    │
-│  │  │ • desktopCapturer.getSources()                   │  │    │
-│  │  │ • clipboard.writeText()                          │  │    │
-│  │  │ • RGB → HEX conversion                           │  │    │
-│  │  └──────────────────────────────────────────────────┘  │    │
+│  │  ┌──────────────┐  ┌──────────────────────────────┐   │    │
+│  │  │   tray.ts    │  │         capture.ts            │   │    │
+│  │  │              │  │                                │   │    │
+│  │  │ • Create icon│  │ • desktopCapturer.getSources()│   │    │
+│  │  │ • Menu items │  │ • clipboard.writeText()       │   │    │
+│  │  │ • Quit action│  │ • RGB → HEX conversion        │   │    │
+│  │  └──────────────┘  └──────────────────────────────┘   │    │
 │  └────────────────────────────────────────────────────────┘    │
 │                            ▲                                     │
 │                            │ IPC (contextBridge)                │
@@ -77,6 +78,37 @@
 ```
 
 ## Data Flow
+
+### 0. Application Lifecycle
+```
+App starts
+    ↓
+main.ts initializes
+    ↓
+tray.ts creates system tray icon
+    ↓
+shortcuts.ts registers global shortcut
+    ↓
+windows.ts creates explore window
+    ↓
+App runs in background
+
+User closes window
+    ↓
+Window hides (not destroyed)
+    ↓
+App continues running with tray
+
+User clicks tray → Show Window
+    ↓
+Explore window becomes visible
+
+User clicks tray → Quit
+    ↓
+Cleanup: destroy tray, unregister shortcuts
+    ↓
+App terminates
+```
 
 ### 1. Global Shortcut Trigger
 ```
@@ -162,10 +194,10 @@ Closes capture window
 
 ## Application States
 
-1. **Background** - No windows, listens for global shortcut
+1. **Background** - No windows visible, system tray active, listens for global shortcut
 2. **Explore** - Small control window with "Start Capture" button
 3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
-4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then exits
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to background
 
 ## Component Hierarchy
 
@@ -194,6 +226,8 @@ App
 ### Main Process State
 - `exploreWindow: BrowserWindow | null`
 - `captureWindow: BrowserWindow | null`
+- `tray: Tray | null` - System tray instance
+- `windowState: WindowState` - Tracks window visibility
 - Global shortcut registration
 
 ### Renderer State (Explore)
