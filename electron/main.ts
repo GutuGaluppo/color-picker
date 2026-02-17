@@ -4,7 +4,8 @@ import {
   createCaptureWindow, 
   closeCaptureWindow,
   hideExploreWindow,
-  showExploreWindow 
+  showExploreWindow,
+  restoreExploreWindowState
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
 import { captureScreen, copyToClipboard } from './capture';
@@ -21,9 +22,8 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    // Don't quit - keep running in background
-  }
+  // Don't quit on any platform - app continues running in background with system tray
+  // User must explicitly select "Quit" from the tray menu to terminate the application
 });
 
 app.on('will-quit', () => {
@@ -52,7 +52,7 @@ ipcMain.handle('copy-to-clipboard', async (_event, text: string) => {
 
 ipcMain.on('close-capture', () => {
   closeCaptureWindow();
-  showExploreWindow();
+  restoreExploreWindowState();
 });
 
 ipcMain.on('start-capture', () => {
@@ -67,5 +67,5 @@ ipcMain.on('close-explore', () => {
 
 ipcMain.on('cancel-capture', () => {
   closeCaptureWindow();
-  showExploreWindow();
+  restoreExploreWindowState();
 });

@@ -1,6 +1,17 @@
 import { BrowserWindow, screen } from "electron";
 import path from "path";
 
+interface WindowState {
+  exploreVisible: boolean;
+  captureActive: boolean;
+  previousExploreState: boolean;
+}
+
+let windowState: WindowState = {
+  exploreVisible: false,
+  captureActive: false,
+  previousExploreState: false
+};
 let exploreWindow: BrowserWindow | null = null;
 let captureWindow: BrowserWindow | null = null;
 
@@ -35,9 +46,17 @@ export function createExploreWindow(): BrowserWindow {
     });
   }
 
+  // Handle window close event - hide instead of destroying
+  exploreWindow.on("close", (event) => {
+    event.preventDefault();
+    exploreWindow?.hide();
+  });
+
   exploreWindow.on("closed", () => {
     exploreWindow = null;
   });
+
+  windowState.exploreVisible = true;
 
   return exploreWindow;
 }
@@ -111,12 +130,23 @@ export function getCaptureWindow(): BrowserWindow | null {
 
 export function hideExploreWindow(): void {
   if (exploreWindow && !exploreWindow.isDestroyed()) {
+    windowState.previousExploreState = exploreWindow.isVisible();
     exploreWindow.hide();
+    windowState.exploreVisible = false;
   }
 }
 
 export function showExploreWindow(): void {
   if (exploreWindow && !exploreWindow.isDestroyed()) {
     exploreWindow.show();
+    windowState.exploreVisible = true;
+  } else {
+    createExploreWindow();
+    windowState.exploreVisible = true;
+  }
+}
+export function restoreExploreWindowState(): void {
+  if (windowState.previousExploreState) {
+    showExploreWindow();
   }
 }
