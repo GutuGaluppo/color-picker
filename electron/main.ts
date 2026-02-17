@@ -34,7 +34,16 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
-    createTray();
+    // Try to create system tray, fallback to showing window if it fails
+    try {
+      createTray();
+    } catch (error) {
+      console.error('Failed to create system tray:', error);
+      console.warn('Continuing without system tray - limited functionality');
+      // Show explore window as fallback when tray is unavailable
+      // This ensures the app is still accessible even without tray support
+    }
+    
     registerGlobalShortcuts();
     createExploreWindow();
 
@@ -64,6 +73,14 @@ ipcMain.handle('capture-screen', async () => {
     return result;
   } catch (error) {
     console.error('Screen capture failed:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
+    
+    // Ensure capture window is closed on error
+    closeCaptureWindow();
+    
+    // Restore explore window state so user can retry
+    restoreExploreWindowState();
+    
     throw error;
   }
 });

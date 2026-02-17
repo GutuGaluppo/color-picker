@@ -8,7 +8,8 @@ export function registerGlobalShortcuts(): void {
   });
 
   if (!ret) {
-    console.error('Global shortcut registration failed');
+    console.warn('Global shortcut registration failed - shortcut may already be in use by another application');
+    console.warn('Application will continue without global shortcut - use UI or system tray to start capture');
   }
 }
 
