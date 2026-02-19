@@ -467,7 +467,8 @@ A comprehensive multi-monitor feature with complete design specification. Displa
 - Manual testing checklist for hardware-dependent scenarios
 - Testing infrastructure setup complete (fast-check installed, test directories created)
 - Note: Some property tests marked optional for MVP and may be skipped to accelerate delivery
-- Display boundary continuity (Property 5) and magnifier offset consistency (Property 6) promoted to required for MVP
+- Properties promoted to required for MVP: Display boundary continuity (Property 5), magnifier offset consistency (Property 6), color copy accuracy (Property 14), RGB to HEX conversion consistency (Property 15)
+- Task 12.4 (unit tests for color utilities) promoted to required for MVP to ensure color conversion accuracy
 
 **Implementation Status:**
 - Task 1 (testing infrastructure) ✅ Complete
@@ -579,7 +580,14 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Tests layout and styling (glassmorphism, max height, flexbox)
     - Tests error handling (history load failure, clipboard failure)
     - File: tests/unit/explore.test.tsx (420 lines, 26 test cases)
-- Tasks 11-16: Pending (checkpoint, color utilities, error handling, integration)
+- Task 11 (Checkpoint 3) ✅ Complete - Renderer components validated
+  - All 144 tests passing (12 test files)
+  - Renderer components (Capture, Magnifier, Explore) fully implemented and tested
+  - Property-based tests covering critical magnifier properties
+  - Unit tests providing comprehensive coverage of component logic
+  - Ready to proceed to color utilities and error handling
+- Tasks 12-16: Pending (color utilities, error handling, integration)
+  - Task 12.2 (RGB to HEX conversion property test) promoted to required for MVP
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
