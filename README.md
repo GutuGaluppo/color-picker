@@ -11,8 +11,8 @@ A fast, silent, and non-intrusive desktop color picker utility built with Electr
 - ⚡ **Fast & Silent** - Minimal feedback, exits immediately after capture
 - 🪟 **Frameless UI** - Clean, glassmorphism design
 - 🔄 **Background Operation** - Runs persistently in system tray until explicitly quit
-- 📜 **Color History** - View and reuse previously captured colors (implementation ready)
-- 🖥️ **Multi-Monitor Support** - Pick colors from any connected display (implementation ready)
+- 📜 **Color History** - View and reuse previously captured colors (implementation complete)
+- 🖥️ **Multi-Monitor Support** - Pick colors from any connected display (implementation complete)
 
 ## Installation
 

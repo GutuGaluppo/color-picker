@@ -181,6 +181,11 @@ export function addColorToHistory(hex: string): void {
     console.log(`[Window Manager] History exceeded ${MAX_HISTORY_ITEMS} items, trimming to limit`);
     windowState.colorHistory = windowState.colorHistory.slice(0, MAX_HISTORY_ITEMS);
   }
+  
+  // Notify Explore window of history update
+  if (exploreWindow && !exploreWindow.isDestroyed()) {
+    exploreWindow.webContents.send('history-updated', windowState.colorHistory);
+  }
 }
 
 /**

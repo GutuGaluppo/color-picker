@@ -426,7 +426,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Send display updates to renderer on change
     - _Requirements: 1.1, 1.2, 1.3_
   
-  - [ ] 15.2 Wire enhanced capture flow end-to-end
+  - [x] 15.2 Wire enhanced capture flow end-to-end
     - Connect Explore → Capture → History flow
     - Ensure Explore window persists after capture
     - Ensure history updates after each capture

@@ -54,6 +54,7 @@ export interface ElectronAPI {
   addColorToHistory: (hex: string) => Promise<void>;
   getColorHistory: () => Promise<ColorHistoryItem[]>;
   onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
+  onHistoryUpdated: (callback: (history: ColorHistoryItem[]) => void) => () => void;
 }
 
 const electronAPI: ElectronAPI = {
@@ -74,6 +75,17 @@ const electronAPI: ElectronAPI = {
     // Return cleanup function
     return () => {
       ipcRenderer.removeListener('displays-changed', listener);
+    };
+  },
+  onHistoryUpdated: (callback: (history: ColorHistoryItem[]) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, history: ColorHistoryItem[]) => {
+      callback(history);
+    };
+    ipcRenderer.on('history-updated', listener);
+    
+    // Return cleanup function
+    return () => {
+      ipcRenderer.removeListener('history-updated', listener);
     };
   },
 };

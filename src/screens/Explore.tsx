@@ -14,6 +14,13 @@ export const Explore: React.FC = () => {
         // Set empty history on error
         setHistory([]);
       });
+    
+    // Listen for history updates
+    const cleanup = window.electronAPI.onHistoryUpdated((updatedHistory) => {
+      setHistory(updatedHistory);
+    });
+    
+    return cleanup;
   }, []);
 
   const handleStartCapture = () => {

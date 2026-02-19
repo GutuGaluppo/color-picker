@@ -56,6 +56,7 @@ declare global {
       addColorToHistory: (hex: string) => Promise<void>;
       getColorHistory: () => Promise<ColorHistoryItem[]>;
       onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
+      onHistoryUpdated: (callback: (history: ColorHistoryItem[]) => void) => () => void;
     };
   }
 }
