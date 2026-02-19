@@ -431,7 +431,6 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - IPC communication validated through existing unit tests
 
 **Next Steps:**
-- Task 9.2: Complete property test for magnifier offset consistency (in progress)
 - Task 10: Enhance Explore screen with color history UI
 - Task 11: Checkpoint - Ensure renderer components work
 - Task 12: Implement color conversion utilities
@@ -504,7 +503,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Color history integration complete
     - findDisplayAtPoint helper function added
   - ⏸️ 8.2-8.5: Property and unit tests marked optional for MVP
-- Task 9 (Enhance Magnifier component) 🔄 In Progress
+- Task 9 (Enhance Magnifier component) ✅ Complete
   - ✅ 9.1: Magnifier.tsx updated with multi-display support
     - Display-specific capture data handling implemented
     - Screen-to-local coordinate conversion working
@@ -516,10 +515,19 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Tests offset consistency across arbitrary cursor positions
     - Tests offset consistency when moving between displays
     - File: tests/property/magnifier-properties.test.ts
-  - 🔄 9.3: Property test for magnifier grid size (in progress)
-    - Property 7: Magnifier Grid Size
-    - Validates: Requirements 5.1
-  - ⏸️ 9.4-9.10: Property and unit tests marked optional for MVP
+  - ✅ 9.3: Property test for magnifier grid size (complete, required for MVP)
+    - Property 7: Magnifier Grid Size validated
+    - Tests 7x7 grid dimensions (49 total pixels)
+    - Tests grid centering on cursor position
+    - Tests consistency across displays with different scale factors
+    - File: tests/property/magnifier-properties.test.ts
+  - ⏭️ 9.4: Property test for pixel sampling accuracy (skipped for MVP)
+    - Property 8: Pixel Sampling Accuracy
+    - Implemented 3 test cases covering coordinate transformation, color integrity, and RGB extraction
+    - Tests validate coordinate accuracy and RGB value preservation rather than full pixel sampling
+    - Deferred full pixel sampling validation to post-MVP phase
+    - File: tests/property/magnifier-properties.test.ts
+  - ⏸️ 9.5-9.10: Property and unit tests marked optional for MVP
 - Tasks 10-16: Pending (remaining renderer updates and integration)
 - Checkpoints at tasks 11 and 16 for validation
 - Estimated completion: 1-2 days for remaining work (Tasks 10-16)
