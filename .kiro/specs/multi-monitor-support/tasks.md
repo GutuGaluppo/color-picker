@@ -269,8 +269,8 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Test displays on correct display
     - _Requirements: 4.4, 5.1, 5.2, 5.3, 5.4, 6.1, 6.3, 6.4, 9.3_
 
-- [ ] 10. Enhance Explore screen component
-  - [ ] 10.1 Update src/screens/Explore.tsx with color history
+- [-] 10. Enhance Explore screen component
+  - [x] 10.1 Update src/screens/Explore.tsx with color history
     - Add state for `history: ColorHistoryItem[]`
     - Load history on mount using `getColorHistory()`
     - Implement history list rendering with color swatches
@@ -281,11 +281,11 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Display empty state when no history
     - _Requirements: 11.1, 11.2, 12.1, 12.2, 12.3, 13.1, 13.2, 13.3_
   
-  - [ ]* 10.2 Write property test for history click-to-copy
+  - [ ] 10.2 Write property test for history click-to-copy
     - **Property 21: History Click-to-Copy**
     - **Validates: Requirements 12.3**
   
-  - [ ]* 10.3 Write unit tests for Explore screen
+  - [ ] 10.3 Write unit tests for Explore screen
     - Test loads history on mount
     - Test displays history items
     - Test click-to-copy functionality

@@ -21,6 +21,7 @@ const GRID_SIZE = 7;
 const CELL_SIZE = MAGNIFIER_SIZE / GRID_SIZE;
 const OFFSET_X = 20;
 const OFFSET_Y = 20;
+const EDGE_THRESHOLD = 60; // MAGNIFIER_SIZE / 2 - distance from edge requiring adjustment
 
 // Mock canvas context
 class MockCanvasRenderingContext2D {
@@ -30,7 +31,6 @@ class MockCanvasRenderingContext2D {
   lineWidth: number = 1;
   imageSmoothingEnabled: boolean = true;
   
-  private imageData: ImageData | null = null;
   private drawnImages: Array<{
     image: HTMLImageElement;
     sx: number;
@@ -49,7 +49,7 @@ class MockCanvasRenderingContext2D {
     this.canvas = canvas;
   }
 
-  clearRect(x: number, y: number, width: number, height: number): void {
+  clearRect(_x: number, _y: number, _width: number, _height: number): void {
     // Mock implementation
   }
 
@@ -138,6 +138,20 @@ class MockCanvasRenderingContext2D {
     this.paths = [];
     this.rects = [];
   }
+}
+
+// Helper function to check if cursor is on a display
+function isCursorOnDisplay(
+  cursorX: number,
+  cursorY: number,
+  display: DisplayCapture
+): boolean {
+  return (
+    cursorX >= display.bounds.x &&
+    cursorX < display.bounds.x + display.bounds.width &&
+    cursorY >= display.bounds.y &&
+    cursorY < display.bounds.y + display.bounds.height
+  );
 }
 
 describe('Magnifier Component Logic', () => {
@@ -351,11 +365,7 @@ describe('Magnifier Component Logic', () => {
       const cursorY = 500;
 
       // Determine which display cursor is on
-      const isOnSecondary = 
-        cursorX >= secondaryDisplay.bounds.x &&
-        cursorX < secondaryDisplay.bounds.x + secondaryDisplay.bounds.width &&
-        cursorY >= secondaryDisplay.bounds.y &&
-        cursorY < secondaryDisplay.bounds.y + secondaryDisplay.bounds.height;
+      const isOnSecondary = isCursorOnDisplay(cursorX, cursorY, secondaryDisplay);
 
       expect(isOnSecondary).toBe(true);
 
@@ -367,9 +377,10 @@ describe('Magnifier Component Logic', () => {
   });
 
   describe('Edge Positioning', () => {
-    it('should adjust position when near right edge of display', () => {
+    it('should detect when magnifier would extend beyond right edge of display', () => {
       // Requirements: 9.3
       // Magnifier must remain fully visible by adjusting offset near edges
+      // This test verifies DETECTION logic - actual adjustment is in component
       
       const displayCapture: DisplayCapture = {
         displayId: 1,
@@ -384,11 +395,7 @@ describe('Magnifier Component Logic', () => {
       const cursorY = 500;
 
       // Calculate magnifier position with standard offset
-      const magnifierX = cursorX + OFFSET_X;
-      const magnifierY = cursorY + OFFSET_Y;
-
-      // Check if magnifier would extend beyond display bounds
-      const magnifierRight = magnifierX + MAGNIFIER_SIZE;
+      const magnifierRight = (cursorX + OFFSET_X) + MAGNIFIER_SIZE;
       const displayRight = displayCapture.bounds.x + displayCapture.bounds.width;
 
       const wouldExtendBeyondRight = magnifierRight > displayRight;
@@ -398,9 +405,10 @@ describe('Magnifier Component Logic', () => {
       // (Note: Edge adjustment logic would be implemented in the component)
     });
 
-    it('should adjust position when near bottom edge of display', () => {
+    it('should detect when magnifier would extend beyond bottom edge of display', () => {
       // Requirements: 9.3
       // Magnifier must remain fully visible near bottom edge
+      // This test verifies DETECTION logic - actual adjustment is in component
       
       const displayCapture: DisplayCapture = {
         displayId: 1,
@@ -415,11 +423,7 @@ describe('Magnifier Component Logic', () => {
       const cursorY = 1060; // Near bottom edge
 
       // Calculate magnifier position with standard offset
-      const magnifierX = cursorX + OFFSET_X;
-      const magnifierY = cursorY + OFFSET_Y;
-
-      // Check if magnifier would extend beyond display bounds
-      const magnifierBottom = magnifierY + MAGNIFIER_SIZE;
+      const magnifierBottom = (cursorY + OFFSET_Y) + MAGNIFIER_SIZE;
       const displayBottom = displayCapture.bounds.y + displayCapture.bounds.height;
 
       const wouldExtendBeyondBottom = magnifierBottom > displayBottom;
