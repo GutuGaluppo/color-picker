@@ -8,6 +8,7 @@ const mockCloseExplore = vi.fn();
 const mockCopyToClipboard = vi.fn();
 const mockGetColorHistory = vi.fn();
 const mockAddColorToHistory = vi.fn();
+const mockOnHistoryUpdated = vi.fn(() => vi.fn()); // Returns cleanup function
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -19,6 +20,7 @@ beforeEach(() => {
     copyToClipboard: mockCopyToClipboard,
     getColorHistory: mockGetColorHistory,
     addColorToHistory: mockAddColorToHistory,
+    onHistoryUpdated: mockOnHistoryUpdated,
     captureScreen: vi.fn(),
     cancelCapture: vi.fn(),
     closeCapture: vi.fn(),

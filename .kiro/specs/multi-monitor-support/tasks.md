@@ -419,7 +419,7 @@ This implementation extends the color picker to support multi-monitor setups wit
   - ✅ Backward compatibility requirements (10.1, 10.2, 10.3, 10.4) fully validated
   - ✅ Ready to proceed to integration and wiring phase
 
-- [-] 15. Integration and wiring
+- [x] 15. Integration and wiring
   - [x] 15.1 Wire Display Manager into main process startup
     - Initialize display listeners in electron/main.ts
     - Store display list in main process state
@@ -439,14 +439,16 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Ensure shortcut works across all displays
     - _Requirements: 11.1, 11.2_
   
-  - [ ] 15.4 Write integration tests for full capture flow
-    - Test full capture flow (start to finish)
-    - Test multi-capture session with history
-    - Test display change during capture
-    - Test error recovery flows
-    - Test keyboard shortcuts
-    - Test window focus management
+  - [x] 15.4 Write integration tests for full capture flow ✅ COMPLETE
+    - ✅ Test full capture flow (start to finish)
+    - ✅ Test multi-capture session with history
+    - ✅ Test display change during capture
+    - ✅ Test error recovery flows
+    - ✅ Test keyboard shortcuts
+    - ✅ Test window focus management
     - _Requirements: All_
+    - _File: tests/integration/capture-flow.test.ts (517 lines, comprehensive end-to-end coverage)_
+    - _Tests: Full capture flow from Explore and shortcut, multi-capture sessions, display changes, error recovery, keyboard shortcuts, window focus, multi-display capture_
 
 - [ ] 16. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.

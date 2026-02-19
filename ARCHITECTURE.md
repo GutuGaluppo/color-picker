@@ -655,7 +655,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Property 18 validated with 3 property tests
   - Unit tests provide comprehensive single-display coverage
   - Ready to proceed to integration and wiring phase
-- Task 15 (Integration and wiring) - In Progress
+- Task 15 (Integration and wiring) ✅ Complete
   - ✅ 15.1: Display Manager wired into main process startup
     - Display listeners initialized in electron/main.ts
     - Display list stored in main process state
@@ -665,8 +665,20 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Explore window persists after capture
     - History updates after each capture
     - Display changes propagate to active capture
-  - ⏸️ 15.3: Global shortcut integration (pending)
-  - ⏸️ 15.4: Integration tests for full capture flow (pending)
+  - ✅ 15.3: Global shortcut integration
+    - Global shortcut registered and functional
+    - Shortcut triggers capture from any state
+    - Error handling for registration failures
+  - ✅ 15.4: Integration tests for full capture flow
+    - Comprehensive integration test suite created (517 lines)
+    - Tests full capture flow from Explore window and global shortcut
+    - Tests multi-capture sessions with history management
+    - Tests display change handling during capture
+    - Tests error recovery flows (capture failure, no displays, timeout)
+    - Tests keyboard shortcut registration and cleanup
+    - Tests window focus management across capture cycles
+    - Tests multi-display capture flow
+    - File: tests/integration/capture-flow.test.ts
 - Task 16: Final checkpoint (pending)
 
 See complete specification:
