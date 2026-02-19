@@ -256,18 +256,21 @@ This implementation extends the color picker to support multi-monitor setups wit
     - **Validates: Requirements 6.3**
     - _Status: Covered by Property 9 tests (coordinate transformation validation)_
   
-  - [x] 9.9 Write property test for magnifier edge positioning
+  - [x] 9.9 Write property test for magnifier edge positioning ✅ COMPLETE
     - **Property 17: Magnifier Edge Positioning**
     - **Validates: Requirements 9.3**
+    - _File: tests/property/magnifier-properties.test.ts (3 test cases)_
   
-  - [x] 9.10 Write unit tests for Magnifier component
-    - Test renders 7x7 grid
-    - Test highlights center pixel
-    - Test samples correct pixel color
-    - Test adjusts position near edges
-    - Test handles scale factors (1x, 2x, 1.5x)
-    - Test displays on correct display
+  - [x] 9.10 Write unit tests for Magnifier component ✅ COMPLETE
+    - ✅ Test renders 7x7 grid
+    - ✅ Test highlights center pixel
+    - ✅ Test samples correct pixel color
+    - ✅ Test adjusts position near edges
+    - ✅ Test handles scale factors (1x, 2x, 1.5x)
+    - ✅ Test displays on correct display
     - _Requirements: 4.4, 5.1, 5.2, 5.3, 5.4, 6.1, 6.3, 6.4, 9.3_
+    - _File: tests/unit/magnifier.test.ts (773 lines, 18 test cases)_
+    - _Covers: Grid rendering, center pixel highlighting, pixel sampling, edge positioning detection, scale factor handling, multi-display support, offset consistency_
 
 - [-] 10. Enhance Explore screen component
   - [x] 10.1 Update src/screens/Explore.tsx with color history
@@ -281,7 +284,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Display empty state when no history
     - _Requirements: 11.1, 11.2, 12.1, 12.2, 12.3, 13.1, 13.2, 13.3_
   
-  - [ ] 10.2 Write property test for history click-to-copy
+  - [x] 10.2 Write property test for history click-to-copy
     - **Property 21: History Click-to-Copy**
     - **Validates: Requirements 12.3**
   

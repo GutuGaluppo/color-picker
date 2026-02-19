@@ -434,7 +434,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
 - Task 10: Enhance Explore screen with color history UI
 - Task 11: Checkpoint - Ensure renderer components work
 - Task 12: Implement color conversion utilities
-- Task 13: Add error handling (including magnifier edge positioning)
+- Task 13: Add error handling
 
 **Architecture:**
 - New Display Manager module (`electron/displays.ts`) for detection and tracking
@@ -551,10 +551,13 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Property 17: Magnifier Edge Positioning validated
     - Tests edge adjustment, continuous edge tracking, and corner handling
     - File: tests/property/magnifier-properties.test.ts (3 test cases)
-  - ⏸️ 9.10: Unit tests marked optional for MVP
+  - ✅ 9.10: Unit tests complete
+    - Comprehensive unit tests for magnifier component logic
+    - Tests grid rendering, center pixel highlighting, pixel sampling
+    - Tests edge positioning detection, scale factor handling
+    - Tests multi-display support and offset consistency
+    - File: tests/unit/magnifier.test.ts (773 lines, 18 test cases)
 - Tasks 10-16: Pending (remaining renderer updates and integration)
-- Checkpoints at tasks 11 and 16 for validation
-- Estimated completion: 1-2 days for remaining work (Tasks 10-16)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
