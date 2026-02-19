@@ -13,7 +13,7 @@ import {
   resizeCaptureWindow
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
-import { captureScreen, copyToClipboard, invalidateCaptureCache } from './capture';
+import { captureAllDisplays, copyToClipboard, invalidateCaptureCache } from './capture';
 import { createTray, destroyTray } from './tray';
 import { initializeDisplayListeners, cleanupDisplayListeners, DisplayInfo } from './displays';
 
@@ -94,7 +94,7 @@ app.on('before-quit', () => {
 // IPC handlers
 ipcMain.handle('capture-screen', async () => {
   try {
-    const result = await captureScreen();
+    const result = await captureAllDisplays();
     return result;
   } catch (error) {
     console.error('Screen capture failed:', error);

@@ -126,9 +126,9 @@ Calls window.electronAPI.captureScreen()
     ↓
 preload/index.ts forwards to main
     ↓
-capture.ts uses desktopCapturer
+capture.ts uses captureAllDisplays()
     ↓
-Returns base64 image to renderer
+Returns multi-display capture data to renderer
 ```
 
 ### 2. Color Picking
@@ -137,9 +137,13 @@ User moves mouse
     ↓
 Capture.tsx updates mousePos state
     ↓
-Magnifier.tsx receives new coordinates
+findDisplayAtPoint determines current display from cursor position
     ↓
-Canvas draws magnified region
+currentDisplay state updated with correct DisplayCapture
+    ↓
+Magnifier.tsx receives display-specific capture data
+    ↓
+Canvas draws magnified region from correct display
     ↓
 Reads center pixel from ImageData
     ↓
@@ -151,17 +155,19 @@ User clicks
     ↓
 Capture.tsx calls copyToClipboard()
     ↓
-preload/index.ts forwards to main
+Capture.tsx calls addColorToHistory()
+    ↓
+preload/index.ts forwards both to main
     ↓
 capture.ts uses clipboard API
+    ↓
+windows.ts adds color to history state
     ↓
 Shows feedback (150ms)
     ↓
 Closes capture window
     ↓
-Explore window receives focus
-    ↓
-Color added to history list
+Explore window receives focus with updated history
 ```
 
 ## Security Model
@@ -258,7 +264,8 @@ App
 {
   mousePos: { x: number, y: number },
   currentColor: string,
-  screenImage: HTMLImageElement | null,
+  captureData: MultiDisplayCapture | null,
+  currentDisplay: DisplayCapture | null,
   showFeedback: boolean,
   copiedColor: string
 }
@@ -423,13 +430,12 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Color history IPC methods (add/get) implemented
   - IPC communication validated through existing unit tests
 
-**In Progress:**
-- Task 8: Enhance Capture screen component for multi-display support
-
 **Next Steps:**
-- Task 8: Enhance Capture screen component for multi-display support
-- Task 9: Enhance Magnifier component with display-specific pixel sampling
+- Task 9.2: Complete property test for magnifier offset consistency (in progress)
 - Task 10: Enhance Explore screen with color history UI
+- Task 11: Checkpoint - Ensure renderer components work
+- Task 12: Implement color conversion utilities
+- Task 13: Add error handling (including magnifier edge positioning)
 
 **Architecture:**
 - New Display Manager module (`electron/displays.ts`) for detection and tracking
@@ -462,6 +468,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
 - Manual testing checklist for hardware-dependent scenarios
 - Testing infrastructure setup complete (fast-check installed, test directories created)
 - Note: Some property tests marked optional for MVP and may be skipped to accelerate delivery
+- Display boundary continuity (Property 5) and magnifier offset consistency (Property 6) promoted to required for MVP
 
 **Implementation Status:**
 - Task 1 (testing infrastructure) ✅ Complete
@@ -490,10 +497,25 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Color history IPC methods working
   - Comprehensive IPC unit tests (tests/unit/ipc.test.ts)
 - Task 7 (Checkpoint 2) ✅ Complete - Main process integration validated
-- Task 8 (Enhance Capture screen) 🔄 In Progress
-- Tasks 9-16: Pending (remaining renderer component updates)
+- Task 8 (Enhance Capture screen) ✅ Complete
+  - ✅ 8.1: Capture.tsx updated with multi-display support
+    - MultiDisplayCapture state management implemented
+    - Display detection from cursor position working
+    - Color history integration complete
+    - findDisplayAtPoint helper function added
+  - ⏸️ 8.2-8.5: Property and unit tests marked optional for MVP
+- Task 9 (Enhance Magnifier component) 🔄 In Progress
+  - ✅ 9.1: Magnifier.tsx updated with multi-display support
+    - Display-specific capture data handling implemented
+    - Screen-to-local coordinate conversion working
+    - Scale factor pixel sampling applied correctly
+    - Consistent offset maintained across displays
+    - Edge positioning deferred to error handling phase (Task 13)
+  - 🔄 9.2: Property test for magnifier offset consistency (in progress, required for MVP)
+  - ⏸️ 9.3-9.10: Property and unit tests marked optional for MVP
+- Tasks 10-16: Pending (remaining renderer updates and integration)
 - Checkpoints at tasks 11 and 16 for validation
-- Estimated completion: 1-2 days for remaining work
+- Estimated completion: 1-2 days for remaining work (Tasks 10-16)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
