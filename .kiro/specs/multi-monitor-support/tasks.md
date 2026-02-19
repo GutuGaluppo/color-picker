@@ -251,7 +251,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - **Validates: Requirements 6.1**
     - _Status: Covered by Display Manager tests (Task 2.4)_
   
-  - [-] 9.8 Write property test for scale factor coordinate conversion
+  - [x] 9.8 Write property test for scale factor coordinate conversion
     - **Property 13: Scale Factor Coordinate Conversion**
     - **Validates: Requirements 6.3**
     - _Status: Covered by Property 9 tests (coordinate transformation validation)_
