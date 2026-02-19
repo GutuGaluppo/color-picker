@@ -655,7 +655,19 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Property 18 validated with 3 property tests
   - Unit tests provide comprehensive single-display coverage
   - Ready to proceed to integration and wiring phase
-- Tasks 15-16: Pending (integration, final checkpoint)
+- Task 15 (Integration and wiring) - In Progress
+  - ✅ 15.1: Display Manager wired into main process startup
+    - Display listeners initialized in electron/main.ts
+    - Display list stored in main process state
+    - Display updates sent to renderer on change
+  - ✅ 15.2: Enhanced capture flow wired end-to-end
+    - Explore → Capture → History flow connected
+    - Explore window persists after capture
+    - History updates after each capture
+    - Display changes propagate to active capture
+  - ⏸️ 15.3: Global shortcut integration (pending)
+  - ⏸️ 15.4: Integration tests for full capture flow (pending)
+- Task 16: Final checkpoint (pending)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)

@@ -433,7 +433,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Ensure display changes propagate to active capture
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 12.1, 12.4_
   
-  - [ ] 15.3 Update global shortcut to work with new flow
+  - [x] 15.3 Update global shortcut to work with new flow
     - Ensure Ctrl/Cmd+Shift+C triggers capture from any state
     - Ensure Explore window shows after capture completes
     - Ensure shortcut works across all displays
