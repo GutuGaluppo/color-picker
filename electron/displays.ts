@@ -23,6 +23,8 @@ export interface VirtualScreenBounds {
 let cachedDisplays: DisplayInfo[] | null = null;
 let displayChangeCallback: ((displays: DisplayInfo[]) => void) | null = null;
 let isListenerInitialized = false;
+let retryTimer: NodeJS.Timeout | null = null;
+const RETRY_INTERVAL_MS = 5000;
 
 /**
  * Convert Electron Display to DisplayInfo
@@ -46,6 +48,7 @@ function toDisplayInfo(display: Display, primaryDisplayId: number): DisplayInfo 
 /**
  * Get all connected displays
  * Uses cache if available, otherwise fetches from system
+ * Implements retry logic for detection failures
  */
 export function getAllDisplays(): DisplayInfo[] {
   if (cachedDisplays !== null) {
@@ -56,23 +59,40 @@ export function getAllDisplays(): DisplayInfo[] {
     const displays = screen.getAllDisplays();
     
     if (displays.length === 0) {
-      console.warn('[Display Manager] No displays detected, falling back to primary display');
+      console.error('[Display Manager] No displays detected, falling back to primary display');
       const primaryDisplay = screen.getPrimaryDisplay();
       const primaryDisplayId = primaryDisplay.id;
       cachedDisplays = [toDisplayInfo(primaryDisplay, primaryDisplayId)];
+      
+      // Start retry timer to detect displays
+      startRetryTimer();
+      
       return cachedDisplays;
     }
+    
+    // Clear retry timer if displays detected successfully
+    clearRetryTimer();
     
     const primaryDisplayId = screen.getPrimaryDisplay().id;
     cachedDisplays = displays.map(d => toDisplayInfo(d, primaryDisplayId));
     return cachedDisplays;
   } catch (error) {
     console.error('[Display Manager] Failed to get displays:', error);
+    
+    // Start retry timer
+    startRetryTimer();
+    
     // Return primary display as fallback
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const primaryDisplayId = primaryDisplay.id;
-    cachedDisplays = [toDisplayInfo(primaryDisplay, primaryDisplayId)];
-    return cachedDisplays;
+    try {
+      const primaryDisplay = screen.getPrimaryDisplay();
+      const primaryDisplayId = primaryDisplay.id;
+      cachedDisplays = [toDisplayInfo(primaryDisplay, primaryDisplayId)];
+      return cachedDisplays;
+    } catch (fallbackError) {
+      console.error('[Display Manager] Failed to get primary display:', fallbackError);
+      // Return empty array as last resort
+      return [];
+    }
   }
 }
 
@@ -129,6 +149,7 @@ export function getVirtualScreenBounds(): VirtualScreenBounds {
 
 /**
  * Handle display change events
+ * Handles display disconnection during capture
  */
 function handleDisplayChange(): void {
   // Invalidate cache
@@ -136,8 +157,48 @@ function handleDisplayChange(): void {
   
   const displays = getAllDisplays();
   
+  if (displays.length === 0) {
+    console.error('[Display Manager] All displays disconnected');
+  }
+  
   if (displayChangeCallback) {
     displayChangeCallback(displays);
+  }
+}
+
+/**
+ * Start retry timer for display detection
+ */
+function startRetryTimer(): void {
+  if (retryTimer !== null) {
+    return; // Timer already running
+  }
+  
+  console.log('[Display Manager] Starting retry timer for display detection');
+  retryTimer = setInterval(() => {
+    console.log('[Display Manager] Retrying display detection...');
+    cachedDisplays = null; // Invalidate cache to force re-detection
+    const displays = getAllDisplays();
+    
+    if (displays.length > 1 || (displays.length === 1 && displays[0].bounds.width > 0)) {
+      console.log('[Display Manager] Display detection successful, stopping retry timer');
+      clearRetryTimer();
+      
+      // Notify callback of successful detection
+      if (displayChangeCallback) {
+        displayChangeCallback(displays);
+      }
+    }
+  }, RETRY_INTERVAL_MS);
+}
+
+/**
+ * Clear retry timer
+ */
+function clearRetryTimer(): void {
+  if (retryTimer !== null) {
+    clearInterval(retryTimer);
+    retryTimer = null;
   }
 }
 
@@ -174,6 +235,7 @@ export function cleanupDisplayListeners(): void {
   screen.removeListener('display-removed', handleDisplayChange);
   screen.removeListener('display-metrics-changed', handleDisplayChange);
   
+  clearRetryTimer();
   displayChangeCallback = null;
   cachedDisplays = null;
   isListenerInitialized = false;
