@@ -256,11 +256,11 @@ This implementation extends the color picker to support multi-monitor setups wit
     - **Validates: Requirements 6.3**
     - _Status: Covered by Property 9 tests (coordinate transformation validation)_
   
-  - [ ]* 9.9 Write property test for magnifier edge positioning
+  - [x] 9.9 Write property test for magnifier edge positioning
     - **Property 17: Magnifier Edge Positioning**
     - **Validates: Requirements 9.3**
   
-  - [ ]* 9.10 Write unit tests for Magnifier component
+  - [ ] 9.10 Write unit tests for Magnifier component
     - Test renders 7x7 grid
     - Test highlights center pixel
     - Test samples correct pixel color

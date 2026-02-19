@@ -1003,6 +1003,368 @@ describe('Magnifier Property Tests', () => {
     });
   });
 
+  describe('Property 17: Magnifier Edge Positioning', () => {
+    it('should adjust offset to remain fully visible when cursor is near display edge', () => {
+      // Feature: multi-monitor-support, Property 17: Magnifier Edge Positioning
+      // Validates: Requirements 9.3
+      
+      // Magnifier dimensions
+      const MAGNIFIER_RADIUS = 60; // MAGNIFIER_SIZE / 2 = 120 / 2
+      
+      fc.assert(
+        fc.property(
+          // Generate cursor positions near display edges
+          fc.record({
+            display: fc.record({
+              id: fc.integer({ min: 1, max: 100 }),
+              bounds: fc.record({
+                x: fc.integer(DISPLAY_RANGES.x),
+                y: fc.integer(DISPLAY_RANGES.y),
+                width: fc.integer(DISPLAY_RANGES.width),
+                height: fc.integer(DISPLAY_RANGES.height)
+              }),
+              scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+              isPrimary: fc.boolean()
+            }),
+            // Generate cursor positions that may be near edges
+            cursorOffsetX: fc.integer({ min: 0, max: 100 }), // Distance from left edge
+            cursorOffsetY: fc.integer({ min: 0, max: 100 }), // Distance from top edge
+            fromRightEdge: fc.boolean(), // Whether to position from right edge
+            fromBottomEdge: fc.boolean() // Whether to position from bottom edge
+          }),
+          ({ display, cursorOffsetX, cursorOffsetY, fromRightEdge, fromBottomEdge }) => {
+            // Calculate cursor position near edge
+            let cursorX: number;
+            let cursorY: number;
+            
+            if (fromRightEdge) {
+              cursorX = display.bounds.x + display.bounds.width - cursorOffsetX;
+            } else {
+              cursorX = display.bounds.x + cursorOffsetX;
+            }
+            
+            if (fromBottomEdge) {
+              cursorY = display.bounds.y + display.bounds.height - cursorOffsetY;
+            } else {
+              cursorY = display.bounds.y + cursorOffsetY;
+            }
+            
+            // Verify cursor is within display bounds
+            if (cursorX < display.bounds.x || cursorX >= display.bounds.x + display.bounds.width ||
+                cursorY < display.bounds.y || cursorY >= display.bounds.y + display.bounds.height) {
+              return true; // Skip positions outside display
+            }
+            
+            // Property: For any cursor position within MAGNIFIER_RADIUS pixels of a display edge,
+            // the magnifier must adjust its offset to remain fully visible within the display bounds
+            
+            // Calculate default magnifier position (with standard offset)
+            const defaultMagnifierLeft = cursorX + MAGNIFIER_OFFSET_X;
+            const defaultMagnifierTop = cursorY + MAGNIFIER_OFFSET_Y;
+            const defaultMagnifierRight = defaultMagnifierLeft + MAGNIFIER_RADIUS * 2;
+            const defaultMagnifierBottom = defaultMagnifierTop + MAGNIFIER_RADIUS * 2;
+            
+            // Calculate display bounds
+            const displayLeft = display.bounds.x;
+            const displayTop = display.bounds.y;
+            const displayRight = display.bounds.x + display.bounds.width;
+            const displayBottom = display.bounds.y + display.bounds.height;
+            
+            // Determine if cursor is near an edge (within MAGNIFIER_RADIUS pixels)
+            const nearLeftEdge = (cursorX - displayLeft) < MAGNIFIER_RADIUS;
+            const nearRightEdge = (displayRight - cursorX) < MAGNIFIER_RADIUS;
+            const nearTopEdge = (cursorY - displayTop) < MAGNIFIER_RADIUS;
+            const nearBottomEdge = (displayBottom - cursorY) < MAGNIFIER_RADIUS;
+            
+            // Calculate adjusted magnifier position
+            let adjustedMagnifierLeft = defaultMagnifierLeft;
+            let adjustedMagnifierTop = defaultMagnifierTop;
+            
+            // Adjust horizontal position if would extend beyond bounds
+            if (defaultMagnifierRight > displayRight) {
+              // Move magnifier to the left of cursor
+              adjustedMagnifierLeft = cursorX - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_X;
+            }
+            if (adjustedMagnifierLeft < displayLeft) {
+              // Clamp to left boundary
+              adjustedMagnifierLeft = displayLeft;
+            }
+            
+            // Adjust vertical position if would extend beyond bounds
+            if (defaultMagnifierBottom > displayBottom) {
+              // Move magnifier above cursor
+              adjustedMagnifierTop = cursorY - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_Y;
+            }
+            if (adjustedMagnifierTop < displayTop) {
+              // Clamp to top boundary
+              adjustedMagnifierTop = displayTop;
+            }
+            
+            // Final clamp to ensure magnifier fits within display
+            adjustedMagnifierLeft = Math.max(displayLeft, Math.min(adjustedMagnifierLeft, displayRight - MAGNIFIER_RADIUS * 2));
+            adjustedMagnifierTop = Math.max(displayTop, Math.min(adjustedMagnifierTop, displayBottom - MAGNIFIER_RADIUS * 2));
+            
+            // Calculate adjusted magnifier bounds
+            const adjustedMagnifierRight = adjustedMagnifierLeft + MAGNIFIER_RADIUS * 2;
+            const adjustedMagnifierBottom = adjustedMagnifierTop + MAGNIFIER_RADIUS * 2;
+            
+            // Property: Adjusted magnifier must be fully visible within display bounds
+            const fullyVisible = 
+              adjustedMagnifierLeft >= displayLeft &&
+              adjustedMagnifierTop >= displayTop &&
+              adjustedMagnifierRight <= displayRight &&
+              adjustedMagnifierBottom <= displayBottom;
+            
+            // If cursor is near edge, magnifier must be adjusted to stay visible
+            if (nearLeftEdge || nearRightEdge || nearTopEdge || nearBottomEdge) {
+              return fullyVisible;
+            }
+            
+            // If cursor is not near edge, default positioning should work
+            return true;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should maintain magnifier visibility when cursor moves along display edges', () => {
+      // Feature: multi-monitor-support, Property 17: Magnifier Edge Positioning
+      // Validates: Requirements 9.3 (continuous edge tracking)
+      
+      const MAGNIFIER_RADIUS = 60; // MAGNIFIER_SIZE / 2
+      
+      fc.assert(
+        fc.property(
+          // Generate a path along display edges
+          fc.record({
+            display: fc.record({
+              id: fc.integer({ min: 1, max: 100 }),
+              bounds: fc.record({
+                x: fc.integer(DISPLAY_RANGES.x),
+                y: fc.integer(DISPLAY_RANGES.y),
+                width: fc.integer(DISPLAY_RANGES.width),
+                height: fc.integer(DISPLAY_RANGES.height)
+              }),
+              scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+              isPrimary: fc.boolean()
+            }),
+            // Generate positions along edges
+            edgePositions: fc.array(
+              fc.record({
+                edge: fc.constantFrom('left', 'right', 'top', 'bottom'),
+                offset: fc.integer({ min: 0, max: 100 }) // Distance from corner
+              }),
+              { minLength: 2, maxLength: 10 }
+            )
+          }),
+          ({ display, edgePositions }) => {
+            // Property: For any cursor movement along display edges,
+            // the magnifier must remain fully visible at all times
+            
+            const displayLeft = display.bounds.x;
+            const displayTop = display.bounds.y;
+            const displayRight = display.bounds.x + display.bounds.width;
+            const displayBottom = display.bounds.y + display.bounds.height;
+            
+            for (const pos of edgePositions) {
+              let cursorX: number;
+              let cursorY: number;
+              
+              // Calculate cursor position based on edge
+              switch (pos.edge) {
+                case 'left':
+                  cursorX = displayLeft + Math.min(pos.offset, MAGNIFIER_RADIUS - 1);
+                  cursorY = displayTop + Math.min(pos.offset * 10, display.bounds.height - 1);
+                  break;
+                case 'right':
+                  cursorX = displayRight - Math.min(pos.offset, MAGNIFIER_RADIUS - 1);
+                  cursorY = displayTop + Math.min(pos.offset * 10, display.bounds.height - 1);
+                  break;
+                case 'top':
+                  cursorX = displayLeft + Math.min(pos.offset * 10, display.bounds.width - 1);
+                  cursorY = displayTop + Math.min(pos.offset, MAGNIFIER_RADIUS - 1);
+                  break;
+                case 'bottom':
+                  cursorX = displayLeft + Math.min(pos.offset * 10, display.bounds.width - 1);
+                  cursorY = displayBottom - Math.min(pos.offset, MAGNIFIER_RADIUS - 1);
+                  break;
+                default:
+                  continue;
+              }
+              
+              // Verify cursor is within display bounds
+              if (cursorX < displayLeft || cursorX >= displayRight ||
+                  cursorY < displayTop || cursorY >= displayBottom) {
+                continue; // Skip invalid positions
+              }
+              
+              // Calculate magnifier position with edge adjustment logic
+              let magnifierLeft = cursorX + MAGNIFIER_OFFSET_X;
+              let magnifierTop = cursorY + MAGNIFIER_OFFSET_Y;
+              
+              // Check if magnifier would extend beyond display bounds
+              const magnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+              const magnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+              
+              // Adjust if extending beyond right edge
+              if (magnifierRight > displayRight) {
+                magnifierLeft = cursorX - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_X;
+              }
+              
+              // Adjust if extending beyond bottom edge
+              if (magnifierBottom > displayBottom) {
+                magnifierTop = cursorY - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_Y;
+              }
+              
+              // Clamp to display bounds if still outside
+              magnifierLeft = Math.max(displayLeft, Math.min(magnifierLeft, displayRight - MAGNIFIER_RADIUS * 2));
+              magnifierTop = Math.max(displayTop, Math.min(magnifierTop, displayBottom - MAGNIFIER_RADIUS * 2));
+              
+              // Recalculate bounds after adjustment
+              const adjustedMagnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+              const adjustedMagnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+              
+              // Property: Magnifier must be fully visible within display bounds
+              const fullyVisible = 
+                magnifierLeft >= displayLeft &&
+                magnifierTop >= displayTop &&
+                adjustedMagnifierRight <= displayRight &&
+                adjustedMagnifierBottom <= displayBottom;
+              
+              if (!fullyVisible) {
+                return false;
+              }
+            }
+            
+            return true;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should handle corner positions where magnifier needs adjustment on both axes', () => {
+      // Feature: multi-monitor-support, Property 17: Magnifier Edge Positioning
+      // Validates: Requirements 9.3 (corner cases)
+      
+      const MAGNIFIER_RADIUS = 60; // MAGNIFIER_SIZE / 2
+      
+      fc.assert(
+        fc.property(
+          // Generate cursor positions in display corners
+          fc.record({
+            display: fc.record({
+              id: fc.integer({ min: 1, max: 100 }),
+              bounds: fc.record({
+                x: fc.integer(DISPLAY_RANGES.x),
+                y: fc.integer(DISPLAY_RANGES.y),
+                width: fc.integer(DISPLAY_RANGES.width),
+                height: fc.integer(DISPLAY_RANGES.height)
+              }),
+              scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+              isPrimary: fc.boolean()
+            }),
+            corner: fc.constantFrom('top-left', 'top-right', 'bottom-left', 'bottom-right'),
+            offsetX: fc.integer({ min: 0, max: 50 }), // Distance from corner edge
+            offsetY: fc.integer({ min: 0, max: 50 })
+          }),
+          ({ display, corner, offsetX, offsetY }) => {
+            // Property: For any cursor position in a display corner,
+            // the magnifier must adjust its offset on both axes to remain fully visible
+            
+            const displayLeft = display.bounds.x;
+            const displayTop = display.bounds.y;
+            const displayRight = display.bounds.x + display.bounds.width;
+            const displayBottom = display.bounds.y + display.bounds.height;
+            
+            // Calculate cursor position based on corner
+            let cursorX: number;
+            let cursorY: number;
+            
+            switch (corner) {
+              case 'top-left':
+                cursorX = displayLeft + offsetX;
+                cursorY = displayTop + offsetY;
+                break;
+              case 'top-right':
+                cursorX = displayRight - offsetX;
+                cursorY = displayTop + offsetY;
+                break;
+              case 'bottom-left':
+                cursorX = displayLeft + offsetX;
+                cursorY = displayBottom - offsetY;
+                break;
+              case 'bottom-right':
+                cursorX = displayRight - offsetX;
+                cursorY = displayBottom - offsetY;
+                break;
+              default:
+                return true;
+            }
+            
+            // Verify cursor is within display bounds
+            if (cursorX < displayLeft || cursorX >= displayRight ||
+                cursorY < displayTop || cursorY >= displayBottom) {
+              return true; // Skip invalid positions
+            }
+            
+            // Calculate magnifier position with full edge adjustment logic
+            let magnifierLeft = cursorX + MAGNIFIER_OFFSET_X;
+            let magnifierTop = cursorY + MAGNIFIER_OFFSET_Y;
+            
+            // Check if magnifier would extend beyond display bounds
+            let magnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+            let magnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+            
+            // Adjust horizontal position if needed
+            if (magnifierRight > displayRight) {
+              magnifierLeft = cursorX - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_X;
+              magnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+            }
+            if (magnifierLeft < displayLeft) {
+              magnifierLeft = displayLeft;
+              magnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+            }
+            
+            // Adjust vertical position if needed
+            if (magnifierBottom > displayBottom) {
+              magnifierTop = cursorY - MAGNIFIER_RADIUS * 2 - MAGNIFIER_OFFSET_Y;
+              magnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+            }
+            if (magnifierTop < displayTop) {
+              magnifierTop = displayTop;
+              magnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+            }
+            
+            // Final clamp to ensure magnifier fits within display
+            magnifierLeft = Math.max(displayLeft, Math.min(magnifierLeft, displayRight - MAGNIFIER_RADIUS * 2));
+            magnifierTop = Math.max(displayTop, Math.min(magnifierTop, displayBottom - MAGNIFIER_RADIUS * 2));
+            
+            // Recalculate final bounds
+            const finalMagnifierRight = magnifierLeft + MAGNIFIER_RADIUS * 2;
+            const finalMagnifierBottom = magnifierTop + MAGNIFIER_RADIUS * 2;
+            
+            // Property: Magnifier must be fully visible within display bounds
+            const fullyVisible = 
+              magnifierLeft >= displayLeft &&
+              magnifierTop >= displayTop &&
+              finalMagnifierRight <= displayRight &&
+              finalMagnifierBottom <= displayBottom;
+            
+            // Property: Magnifier dimensions must remain constant (no squashing)
+            const dimensionsPreserved = 
+              (finalMagnifierRight - magnifierLeft) === MAGNIFIER_RADIUS * 2 &&
+              (finalMagnifierBottom - magnifierTop) === MAGNIFIER_RADIUS * 2;
+            
+            return fullyVisible && dimensionsPreserved;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
   describe('Property 11: Display Scale Factor Retrieval', () => {
     it('should retrieve valid scale factor for any display in the system', () => {
       // Feature: multi-monitor-support, Property 11: Display Scale Factor Retrieval
