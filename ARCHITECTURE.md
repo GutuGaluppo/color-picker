@@ -247,10 +247,16 @@ App
     exploreVisible: boolean;
     captureActive: boolean;
     previousExploreState: boolean;
-    colorHistory: ColorHistoryItem[];  // Max 1000 items, session-scoped
+    colorHistory: ColorHistoryItem[];  // Max 1000 items, session-scoped, auto-trimmed
   }
   ```
+- `MAX_HISTORY_ITEMS: 1000` - Constant defining maximum color history size
 - Global shortcut registration
+
+**Color History Management:**
+- History is automatically trimmed when it exceeds `MAX_HISTORY_ITEMS` (1000)
+- Trimming is logged to console for debugging
+- Most recent colors are preserved (FIFO queue behavior)
 
 ### Renderer State (Explore)
 ```typescript
@@ -621,7 +627,12 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - History trimming to last 1000 items
     - Deferred as optimization feature for post-MVP
   - Task 13.5: Write unit tests for error handling (pending)
-- Tasks 14-16: Pending (backward compatibility, integration, final checkpoint)
+- Task 14 (Backward compatibility verification) ⏸️ Partially Skipped
+  - ⏸️ Task 14.1: Property test for single display backward compatibility (skipped for MVP)
+    - Property 18: Single Display Backward Compatibility
+    - Deferred to post-MVP phase
+  - Task 14.2: Unit tests for single-monitor behavior (pending)
+- Tasks 15-16: Pending (integration, final checkpoint)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
