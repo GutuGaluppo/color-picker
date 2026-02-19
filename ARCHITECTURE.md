@@ -547,10 +547,10 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - ✅ 9.8: Property test for scale factor coordinate conversion (covered by Property 9)
     - Property 13: Scale Factor Coordinate Conversion
     - Covered by Property 9 tests (coordinate transformation validation)
-  - 🔄 9.9: Property test for magnifier edge positioning (in progress)
-    - Property 17: Magnifier Edge Positioning
-    - Validates: Requirements 9.3
-    - Status: Deferred to error handling phase (Task 13)
+  - ✅ 9.9: Property test for magnifier edge positioning (complete)
+    - Property 17: Magnifier Edge Positioning validated
+    - Tests edge adjustment, continuous edge tracking, and corner handling
+    - File: tests/property/magnifier-properties.test.ts (3 test cases)
   - ⏸️ 9.10: Unit tests marked optional for MVP
 - Tasks 10-16: Pending (remaining renderer updates and integration)
 - Checkpoints at tasks 11 and 16 for validation
