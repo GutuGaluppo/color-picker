@@ -605,8 +605,16 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - File: tests/unit/color.test.ts (30+ test cases)
 - Task 12.5 (Checkpoint) ✅ Complete - Color utilities validated
 - Task 13 (Error handling) 🔄 In Progress
-  - Task 13.1: Add error handling to Display Manager (pending)
-  - Task 13.2: Add error handling to Screen Capture (pending)
+  - ✅ Task 13.1: Add error handling to Display Manager (complete)
+    - No displays detected fallback to primary display
+    - Error logging for display detection failures
+    - Null return for invalid display lookups
+  - ✅ Task 13.2: Add error handling to Screen Capture (complete)
+    - 5-second timeout for desktopCapturer.getSources()
+    - Dimension tolerance (±10px) for source-to-display matching
+    - Relaxed tolerance fallback (±20px) for difficult matches
+    - Proper error messages and logging
+    - No sources available error handling
   - Task 13.3: Add error handling to Magnifier (pending)
   - Task 13.4: Add memory management (pending)
   - Task 13.5: Write unit tests for error handling (pending)

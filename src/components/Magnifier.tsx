@@ -23,6 +23,7 @@ export const Magnifier: React.FC<MagnifierProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const screenImageRef = useRef<HTMLImageElement | null>(null);
+  const [canvasError, setCanvasError] = React.useState(false);
 
   // Load display capture image
   useEffect(() => {
@@ -32,6 +33,10 @@ export const Magnifier: React.FC<MagnifierProps> = ({
     img.onload = () => {
       screenImageRef.current = img;
     };
+    img.onerror = () => {
+      console.error('[Magnifier] Failed to load display capture image');
+      screenImageRef.current = null;
+    };
     img.src = displayCapture.dataUrl;
 
     return () => {
@@ -40,12 +45,31 @@ export const Magnifier: React.FC<MagnifierProps> = ({
   }, [displayCapture]);
 
   useEffect(() => {
-    if (!canvasRef.current || !displayCapture || !screenImageRef.current) return;
+    if (!canvasRef.current || !displayCapture || !screenImageRef.current) {
+      // Handle missing image data - display placeholder color
+      if (!screenImageRef.current && displayCapture) {
+        console.warn('[Magnifier] Image data not available, will retry on next render');
+        onColorChange('#000000');
+      }
+      return;
+    }
 
     const screenImage = screenImageRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return;
+    
+    // Handle canvas context creation failure
+    if (!ctx) {
+      console.error('[Magnifier] Failed to get canvas context');
+      setCanvasError(true);
+      onColorChange('#000000');
+      return;
+    }
+    
+    // Clear error state if context was successfully created
+    if (canvasError) {
+      setCanvasError(false);
+    }
 
     // Convert screen coordinates to display-local coordinates
     const localX = x - displayCapture.bounds.x;
@@ -73,17 +97,23 @@ export const Magnifier: React.FC<MagnifierProps> = ({
     const sourceX = Math.max(0, scaledX - halfGrid);
     const sourceY = Math.max(0, scaledY - halfGrid);
 
-    ctx.drawImage(
-      screenImage,
-      sourceX,
-      sourceY,
-      GRID_SIZE,
-      GRID_SIZE,
-      0,
-      0,
-      MAGNIFIER_SIZE,
-      MAGNIFIER_SIZE,
-    );
+    try {
+      ctx.drawImage(
+        screenImage,
+        sourceX,
+        sourceY,
+        GRID_SIZE,
+        GRID_SIZE,
+        0,
+        0,
+        MAGNIFIER_SIZE,
+        MAGNIFIER_SIZE,
+      );
+    } catch (error) {
+      console.error('[Magnifier] Failed to draw image:', error);
+      onColorChange('#000000');
+      return;
+    }
 
     // =========================
     // 3. Draw grid
@@ -127,17 +157,22 @@ export const Magnifier: React.FC<MagnifierProps> = ({
     // =========================
     // 6. Read center pixel color
     // =========================
-    const imageData = ctx.getImageData(
-      centerX + CELL_SIZE / 2,
-      centerY + CELL_SIZE / 2,
-      1,
-      1,
-    );
+    try {
+      const imageData = ctx.getImageData(
+        centerX + CELL_SIZE / 2,
+        centerY + CELL_SIZE / 2,
+        1,
+        1,
+      );
 
-    const pixel = getPixelFromImageData(imageData, 0, 0);
-    const hexColor = rgbToHex(pixel.r, pixel.g, pixel.b);
-    onColorChange(hexColor);
-  }, [x, y, displayCapture, onColorChange]);
+      const pixel = getPixelFromImageData(imageData, 0, 0);
+      const hexColor = rgbToHex(pixel.r, pixel.g, pixel.b);
+      onColorChange(hexColor);
+    } catch (error) {
+      console.error('[Magnifier] Failed to read pixel color:', error);
+      onColorChange('#000000');
+    }
+  }, [x, y, displayCapture, onColorChange, canvasError]);
 
   return (
     <div
