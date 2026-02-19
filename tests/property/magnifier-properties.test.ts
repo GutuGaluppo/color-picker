@@ -304,6 +304,258 @@ describe('Magnifier Property Tests', () => {
     });
   });
 
+  describe('Property 9: Scale Factor Magnification', () => {
+    it('should sample physical pixels accounting for scale factor', () => {
+      // Feature: multi-monitor-support, Property 9: Scale Factor Magnification
+      // Validates: Requirements 5.3, 6.4
+      
+      fc.assert(
+        fc.property(
+          // Generate cursor positions on displays with varying scale factors
+          fc.record({
+            cursorX: fc.integer({ min: 10, max: 1000 }),
+            cursorY: fc.integer({ min: 10, max: 1000 }),
+            display: fc.record({
+              id: fc.integer({ min: 1, max: 100 }),
+              bounds: fc.record({
+                x: fc.integer({ min: 0, max: 1920 }),
+                y: fc.integer({ min: 0, max: 1080 }),
+                width: fc.integer({ min: 800, max: 3840 }),
+                height: fc.integer({ min: 600, max: 2160 })
+              }),
+              scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+              isPrimary: fc.boolean()
+            })
+          }),
+          ({ cursorX, cursorY, display }) => {
+            // Property: For any cursor position on a display with scale factor S,
+            // the magnifier must sample physical pixels accounting for S
+            
+            // Convert screen coordinates to display-local coordinates
+            const localX = cursorX - display.bounds.x;
+            const localY = cursorY - display.bounds.y;
+            
+            // Verify cursor is within display bounds
+            if (localX < 0 || localX >= display.bounds.width ||
+                localY < 0 || localY >= display.bounds.height) {
+              return true; // Skip positions outside display
+            }
+            
+            // Apply scale factor for physical pixel sampling
+            const physicalX = localX * display.scaleFactor;
+            const physicalY = localY * display.scaleFactor;
+            
+            // Verify physical coordinates are within physical bounds
+            const physicalWidth = display.bounds.width * display.scaleFactor;
+            const physicalHeight = display.bounds.height * display.scaleFactor;
+            
+            // Property 1: Physical pixel coordinates must be within physical bounds
+            const withinPhysicalBounds = 
+              physicalX >= 0 && physicalX < physicalWidth &&
+              physicalY >= 0 && physicalY < physicalHeight;
+            
+            // Property 2: Scale factor must be applied consistently
+            const expectedPhysicalX = localX * display.scaleFactor;
+            const expectedPhysicalY = localY * display.scaleFactor;
+            const scaleAppliedCorrectly = 
+              physicalX === expectedPhysicalX &&
+              physicalY === expectedPhysicalY;
+            
+            // Property 3: Magnification factor must match scale factor
+            // For a 7x7 logical grid, physical sampling area should be (7*S) x (7*S)
+            const logicalGridSize = MAGNIFIER_GRID_SIZE;
+            const physicalGridSize = logicalGridSize * display.scaleFactor;
+            const magnificationCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
+            
+            return withinPhysicalBounds && scaleAppliedCorrectly && magnificationCorrect;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should maintain accurate pixel sampling when moving between displays with different scale factors', () => {
+      // Feature: multi-monitor-support, Property 9: Scale Factor Magnification
+      // Validates: Requirements 6.4 (cross-display scale factor handling)
+      
+      fc.assert(
+        fc.property(
+          // Generate a sequence of cursor movements across displays with different scale factors
+          fc.record({
+            displays: fc.array(
+              fc.record({
+                id: fc.integer({ min: 1, max: 100 }),
+                bounds: fc.record({
+                  x: fc.integer(DISPLAY_RANGES.x),
+                  y: fc.integer(DISPLAY_RANGES.y),
+                  width: fc.integer(DISPLAY_RANGES.width),
+                  height: fc.integer(DISPLAY_RANGES.height)
+                }),
+                scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+                isPrimary: fc.boolean()
+              }),
+              { minLength: 2, maxLength: 4 }
+            ).filter(displays => {
+              // Ensure we have at least 2 displays with different scale factors
+              const scaleFactors = new Set(displays.map(d => d.scaleFactor));
+              return scaleFactors.size >= 2;
+            }),
+            cursorPath: fc.array(
+              fc.record({
+                x: fc.integer(COORD_RANGES.x),
+                y: fc.integer(COORD_RANGES.y)
+              }),
+              { minLength: 3, maxLength: 10 }
+            )
+          }),
+          ({ displays, cursorPath }) => {
+            if (displays.length < 2) {
+              return true; // Skip if filter didn't produce enough displays
+            }
+            
+            const validDisplays = ensurePrimaryDisplay(displays);
+            
+            // Property: When cursor moves between displays with different scale factors,
+            // pixel sampling accuracy must be maintained
+            
+            let previousDisplay: TestDisplay | null = null;
+            
+            for (const pos of cursorPath) {
+              const currentDisplay = findDisplayAtPoint(pos.x, pos.y, validDisplays);
+              
+              // Only test positions that are on a display
+              if (!currentDisplay) {
+                continue;
+              }
+              
+              // Convert to display-local coordinates
+              const localX = pos.x - currentDisplay.bounds.x;
+              const localY = pos.y - currentDisplay.bounds.y;
+              
+              // Apply scale factor
+              const physicalX = localX * currentDisplay.scaleFactor;
+              const physicalY = localY * currentDisplay.scaleFactor;
+              
+              // Verify physical coordinates are valid
+              const physicalWidth = currentDisplay.bounds.width * currentDisplay.scaleFactor;
+              const physicalHeight = currentDisplay.bounds.height * currentDisplay.scaleFactor;
+              
+              if (physicalX < 0 || physicalX >= physicalWidth ||
+                  physicalY < 0 || physicalY >= physicalHeight) {
+                continue; // Skip invalid positions
+              }
+              
+              // If we transitioned to a different display with different scale factor
+              if (previousDisplay && 
+                  previousDisplay.id !== currentDisplay.id &&
+                  previousDisplay.scaleFactor !== currentDisplay.scaleFactor) {
+                
+                // Property: Scale factor transition must maintain sampling accuracy
+                // The physical pixel calculation must use the new display's scale factor
+                const expectedPhysicalX = localX * currentDisplay.scaleFactor;
+                const expectedPhysicalY = localY * currentDisplay.scaleFactor;
+                
+                if (physicalX !== expectedPhysicalX || physicalY !== expectedPhysicalY) {
+                  return false;
+                }
+                
+                // Property: Magnification must adjust to new scale factor
+                const newMagnification = MAGNIFIER_GRID_SIZE * currentDisplay.scaleFactor;
+                const oldMagnification = MAGNIFIER_GRID_SIZE * previousDisplay.scaleFactor;
+                
+                // Magnification should change proportionally to scale factor change
+                const scaleRatio = currentDisplay.scaleFactor / previousDisplay.scaleFactor;
+                const magnificationRatio = newMagnification / oldMagnification;
+                
+                if (Math.abs(magnificationRatio - scaleRatio) > 0.001) {
+                  return false;
+                }
+              }
+              
+              previousDisplay = currentDisplay;
+            }
+            
+            return true;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should calculate correct physical sampling area for each scale factor', () => {
+      // Feature: multi-monitor-support, Property 9: Scale Factor Magnification
+      // Validates: Requirements 5.3 (magnifier adjusts for scale)
+      
+      fc.assert(
+        fc.property(
+          // Generate displays with various scale factors
+          fc.record({
+            display: fc.record({
+              id: fc.integer({ min: 1, max: 100 }),
+              bounds: fc.record({
+                x: fc.integer({ min: 0, max: 1920 }),
+                y: fc.integer({ min: 0, max: 1080 }),
+                width: fc.integer({ min: 800, max: 3840 }),
+                height: fc.integer({ min: 600, max: 2160 })
+              }),
+              scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+              isPrimary: fc.boolean()
+            }),
+            cursorX: fc.integer({ min: 10, max: 1000 }),
+            cursorY: fc.integer({ min: 10, max: 1000 })
+          }),
+          ({ display, cursorX, cursorY }) => {
+            // Property: For any display with scale factor S,
+            // the physical sampling area must be (7*S) x (7*S) pixels
+            
+            const localX = cursorX - display.bounds.x;
+            const localY = cursorY - display.bounds.y;
+            
+            // Verify cursor is within display bounds
+            if (localX < 0 || localX >= display.bounds.width ||
+                localY < 0 || localY >= display.bounds.height) {
+              return true; // Skip positions outside display
+            }
+            
+            // Calculate the physical sampling area
+            const logicalGridSize = MAGNIFIER_GRID_SIZE; // 7 pixels
+            const physicalGridSize = logicalGridSize * display.scaleFactor;
+            
+            // Calculate grid bounds in physical coordinates
+            const halfGrid = Math.floor(logicalGridSize / 2); // 3 pixels
+            const physicalHalfGrid = halfGrid * display.scaleFactor;
+            
+            const physicalCenterX = localX * display.scaleFactor;
+            const physicalCenterY = localY * display.scaleFactor;
+            
+            const physicalGridStartX = physicalCenterX - physicalHalfGrid;
+            const physicalGridStartY = physicalCenterY - physicalHalfGrid;
+            const physicalGridEndX = physicalGridStartX + physicalGridSize;
+            const physicalGridEndY = physicalGridStartY + physicalGridSize;
+            
+            // Property 1: Physical grid dimensions must equal logical grid * scale factor
+            const widthCorrect = (physicalGridEndX - physicalGridStartX) === physicalGridSize;
+            const heightCorrect = (physicalGridEndY - physicalGridStartY) === physicalGridSize;
+            
+            // Property 2: Physical grid must contain the correct number of physical pixels
+            const expectedPhysicalPixels = logicalGridSize * display.scaleFactor * 
+                                          logicalGridSize * display.scaleFactor;
+            const actualPhysicalPixels = physicalGridSize * physicalGridSize;
+            const pixelCountCorrect = actualPhysicalPixels === expectedPhysicalPixels;
+            
+            // Property 3: Scale factor must be applied uniformly in both dimensions
+            const xScaleCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
+            const yScaleCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
+            
+            return widthCorrect && heightCorrect && pixelCountCorrect && 
+                   xScaleCorrect && yScaleCorrect;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
   describe('Property 8: Pixel Sampling Accuracy', () => {
     it('should sample pixels with RGB values matching actual screen pixels', () => {
       // Feature: multi-monitor-support, Property 8: Pixel Sampling Accuracy

@@ -503,7 +503,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Color history integration complete
     - findDisplayAtPoint helper function added
   - ⏸️ 8.2-8.5: Property and unit tests marked optional for MVP
-- Task 9 (Enhance Magnifier component) ✅ Complete
+- Task 9 (Enhance Magnifier component) ⏳ In Progress
   - ✅ 9.1: Magnifier.tsx updated with multi-display support
     - Display-specific capture data handling implemented
     - Screen-to-local coordinate conversion working
@@ -527,7 +527,11 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Tests validate coordinate accuracy and RGB value preservation rather than full pixel sampling
     - Deferred full pixel sampling validation to post-MVP phase
     - File: tests/property/magnifier-properties.test.ts
-  - ⏸️ 9.5-9.10: Property and unit tests marked optional for MVP
+  - ⏳ 9.5: Property test for scale factor magnification (required for MVP)
+    - Property 9: Scale Factor Magnification
+    - Validates: Requirements 5.3, 6.4
+    - Status: Pending implementation
+  - ⏸️ 9.6-9.10: Property and unit tests marked optional for MVP
 - Tasks 10-16: Pending (remaining renderer updates and integration)
 - Checkpoints at tasks 11 and 16 for validation
 - Estimated completion: 1-2 days for remaining work (Tasks 10-16)

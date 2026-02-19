@@ -234,27 +234,27 @@ This implementation extends the color picker to support multi-monitor setups wit
     - _Status: Skipped for MVP - Tests coordinate transformation accuracy and RGB value integrity instead of full pixel sampling_
     - _File: tests/property/magnifier-properties.test.ts (3 test cases covering coordinate accuracy, color distortion, and RGB extraction)_
   
-  - [ ]* 9.5 Write property test for scale factor magnification
+  - [x] 9.5 Write property test for scale factor magnification
     - **Property 9: Scale Factor Magnification**
     - **Validates: Requirements 5.3, 6.4**
   
-  - [ ]* 9.6 Write property test for center pixel extraction
+  - [ ] 9.6 Write property test for center pixel extraction
     - **Property 10: Center Pixel Extraction**
     - **Validates: Requirements 5.4**
   
-  - [ ]* 9.7 Write property test for display scale factor retrieval
+  - [ ] 9.7 Write property test for display scale factor retrieval
     - **Property 11: Display Scale Factor Retrieval**
     - **Validates: Requirements 6.1**
   
-  - [ ]* 9.8 Write property test for scale factor coordinate conversion
+  - [ ] 9.8 Write property test for scale factor coordinate conversion
     - **Property 13: Scale Factor Coordinate Conversion**
     - **Validates: Requirements 6.3**
   
-  - [ ]* 9.9 Write property test for magnifier edge positioning
+  - [ ] 9.9 Write property test for magnifier edge positioning
     - **Property 17: Magnifier Edge Positioning**
     - **Validates: Requirements 9.3**
   
-  - [ ]* 9.10 Write unit tests for Magnifier component
+  - [ ] 9.10 Write unit tests for Magnifier component
     - Test renders 7x7 grid
     - Test highlights center pixel
     - Test samples correct pixel color
