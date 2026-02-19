@@ -173,7 +173,7 @@ This implementation extends the color picker to support multi-monitor setups wit
   - ✅ All 58 tests passing (7 test files)
   - ✅ Ready to proceed to renderer component updates
 
-- [-] 8. Enhance Capture screen component
+- [x] 8. Enhance Capture screen component
   - [x] 8.1 Update src/screens/Capture.tsx for multi-display support
     - Add state for `captureData: MultiDisplayCapture | null`
     - Add state for `currentDisplay: DisplayCapture | null`
