@@ -326,7 +326,7 @@ App
 ```
 Main Process Bundle:   ~50 KB
 Renderer Bundle:      ~150 KB
-Test Suite:           ~25 KB (unit tests)
+Test Suite:           ~50 KB (unit + property tests)
 Electron Runtime:    ~200 MB
 Total App Size:      ~200 MB (typical)
 ```
@@ -557,7 +557,29 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Tests edge positioning detection, scale factor handling
     - Tests multi-display support and offset consistency
     - File: tests/unit/magnifier.test.ts (773 lines, 18 test cases)
-- Tasks 10-16: Pending (remaining renderer updates and integration)
+- Task 10 (Enhance Explore screen component) ✅ Complete
+  - ✅ 10.1: Explore.tsx updated with color history UI
+    - Color history state management implemented
+    - History loading on mount working
+    - History list rendering with color swatches
+    - Click-to-copy functionality implemented
+    - Copy feedback display (1.5s timeout)
+    - Glassmorphism styling applied
+    - Scrollable container for history list
+    - Empty state display when no history
+  - ✅ 10.2: Property test for history click-to-copy (complete)
+    - Property 21: History Click-to-Copy validated
+  - ✅ 10.3: Unit tests complete
+    - Comprehensive unit tests for Explore screen component
+    - Tests component rendering (button, icon, shortcut hint, hide button)
+    - Tests history loading and display (empty state, multiple items, swatches)
+    - Tests click-to-copy functionality (single, multiple, feedback, timeout)
+    - Tests button actions (start capture, hide)
+    - Tests scroll behavior (scrollable container, custom scrollbar, many items)
+    - Tests layout and styling (glassmorphism, max height, flexbox)
+    - Tests error handling (history load failure, clipboard failure)
+    - File: tests/unit/explore.test.tsx (420 lines, 26 test cases)
+- Tasks 11-16: Pending (checkpoint, color utilities, error handling, integration)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)

@@ -272,7 +272,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - _File: tests/unit/magnifier.test.ts (773 lines, 18 test cases)_
     - _Covers: Grid rendering, center pixel highlighting, pixel sampling, edge positioning detection, scale factor handling, multi-display support, offset consistency_
 
-- [-] 10. Enhance Explore screen component
+- [x] 10. Enhance Explore screen component ✅ COMPLETE
   - [x] 10.1 Update src/screens/Explore.tsx with color history
     - Add state for `history: ColorHistoryItem[]`
     - Load history on mount using `getColorHistory()`
@@ -288,16 +288,21 @@ This implementation extends the color picker to support multi-monitor setups wit
     - **Property 21: History Click-to-Copy**
     - **Validates: Requirements 12.3**
   
-  - [ ] 10.3 Write unit tests for Explore screen
-    - Test loads history on mount
-    - Test displays history items
-    - Test click-to-copy functionality
-    - Test feedback on copy
-    - Test scroll behavior with many items
-    - Test empty state display
+  - [x] 10.3 Write unit tests for Explore screen ✅ COMPLETE
+    - ✅ Test loads history on mount
+    - ✅ Test displays history items
+    - ✅ Test click-to-copy functionality
+    - ✅ Test feedback on copy
+    - ✅ Test scroll behavior with many items
+    - ✅ Test empty state display
+    - ✅ Test component rendering (button, icon, shortcut hint)
+    - ✅ Test button actions (start capture, hide)
+    - ✅ Test layout and styling (glassmorphism, flexbox)
+    - ✅ Test error handling (history load failure, clipboard failure)
     - _Requirements: 11.1, 11.2, 12.1, 12.2, 12.3_
+    - _File: tests/unit/explore.test.tsx (420 lines, 26 test cases)_
 
-- [ ] 11. Checkpoint - Ensure renderer components work
+- [x] 11. Checkpoint - Ensure renderer components work
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 12. Implement color conversion utilities

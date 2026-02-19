@@ -7,7 +7,13 @@ export const Explore: React.FC = () => {
 
   useEffect(() => {
     // Load history on mount
-    window.electronAPI.getColorHistory().then(setHistory);
+    window.electronAPI.getColorHistory()
+      .then(setHistory)
+      .catch((error) => {
+        console.error('Failed to load color history:', error);
+        // Set empty history on error
+        setHistory([]);
+      });
   }, []);
 
   const handleStartCapture = () => {

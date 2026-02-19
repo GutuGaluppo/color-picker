@@ -719,13 +719,20 @@ tests/
 ├── unit/
 │   ├── displays.test.ts (587 lines) ✅
 │   ├── capture.test.ts (570 lines) ✅
-│   ├── windows.test.ts
+│   ├── windows.test.ts ✅
+│   ├── ipc.test.ts ✅
+│   ├── error-handling.test.ts ✅
+│   ├── magnifier.test.ts (773 lines, 18 test cases) ✅
+│   ├── explore.test.tsx (420 lines, 26 test cases) ✅
 │   └── components/
 │       ├── Magnifier.test.tsx
 │       └── Explore.test.tsx
 └── properties/
-    ├── display-properties.test.ts
+    ├── display-properties.test.ts ✅
     ├── capture-properties.test.ts (2 properties) ✅
+    ├── window-properties.test.ts ✅
+    ├── magnifier-properties.test.ts ✅
+    ├── launch-activation.test.ts ✅
     ├── coordinate-properties.test.ts
     └── color-properties.test.ts
 ```
