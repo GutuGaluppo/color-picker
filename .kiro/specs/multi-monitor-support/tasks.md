@@ -146,7 +146,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - Update `ElectronAPI` interface with new methods
     - _Requirements: 1.2, 1.3, 2.1, 12.1, 12.2_
   
-  - [ ] 6.2 Add IPC handlers in electron/main.ts
+  - [x] 6.2 Add IPC handlers in electron/main.ts
     - Add handler for 'add-color-to-history'
     - Add handler for 'get-color-history'
     - Add handler for 'displays-changed' event

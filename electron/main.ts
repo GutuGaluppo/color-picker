@@ -6,7 +6,11 @@ import {
   hideExploreWindow,
   showExploreWindow,
   restoreExploreWindowState,
-  getExploreWindow
+  getExploreWindow,
+  getCaptureWindow,
+  addColorToHistory,
+  getColorHistory,
+  resizeCaptureWindow
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
 import { captureScreen, copyToClipboard, invalidateCaptureCache } from './capture';
@@ -39,6 +43,19 @@ if (!gotTheLock) {
     initializeDisplayListeners((displays: DisplayInfo[]) => {
       console.log('[Main] Display configuration changed:', displays.length, 'displays');
       invalidateCaptureCache();
+      
+      // Resize capture window if active
+      const captureWindow = getCaptureWindow();
+      if (captureWindow && !captureWindow.isDestroyed()) {
+        resizeCaptureWindow();
+      }
+      
+      // Notify all renderer processes about display changes
+      BrowserWindow.getAllWindows().forEach(window => {
+        if (!window.isDestroyed()) {
+          window.webContents.send('displays-changed', displays);
+        }
+      });
     });
 
     // Try to create system tray, fallback to showing window if it fails
@@ -116,4 +133,12 @@ ipcMain.on('close-explore', () => {
 ipcMain.on('cancel-capture', () => {
   closeCaptureWindow();
   restoreExploreWindowState();
+});
+
+ipcMain.handle('add-color-to-history', async (_event, hex: string) => {
+  addColorToHistory(hex);
+});
+
+ipcMain.handle('get-color-history', async () => {
+  return getColorHistory();
 });
