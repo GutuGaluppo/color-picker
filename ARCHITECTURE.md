@@ -511,8 +511,15 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Scale factor pixel sampling applied correctly
     - Consistent offset maintained across displays
     - Edge positioning deferred to error handling phase (Task 13)
-  - 🔄 9.2: Property test for magnifier offset consistency (in progress, required for MVP)
-  - ⏸️ 9.3-9.10: Property and unit tests marked optional for MVP
+  - ✅ 9.2: Property test for magnifier offset consistency (complete, required for MVP)
+    - Property 6: Magnifier Offset Consistency validated
+    - Tests offset consistency across arbitrary cursor positions
+    - Tests offset consistency when moving between displays
+    - File: tests/property/magnifier-properties.test.ts
+  - 🔄 9.3: Property test for magnifier grid size (in progress)
+    - Property 7: Magnifier Grid Size
+    - Validates: Requirements 5.1
+  - ⏸️ 9.4-9.10: Property and unit tests marked optional for MVP
 - Tasks 10-16: Pending (remaining renderer updates and integration)
 - Checkpoints at tasks 11 and 16 for validation
 - Estimated completion: 1-2 days for remaining work (Tasks 10-16)

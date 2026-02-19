@@ -216,11 +216,13 @@ This implementation extends the color picker to support multi-monitor setups wit
     - _File: src/components/Magnifier.tsx (complete implementation)_
     - _Note: Edge positioning adjustment will be handled in error handling phase_
   
-  - [x] 9.2 Write property test for magnifier offset consistency
+  - [x] 9.2 Write property test for magnifier offset consistency ✅ COMPLETE
     - **Property 6: Magnifier Offset Consistency**
     - **Validates: Requirements 4.4**
+    - _File: tests/property/magnifier-properties.test.ts_
+    - _Tests offset consistency across arbitrary cursor positions and display transitions_
   
-  - [ ] 9.3 Write property test for magnifier grid size
+  - [x] 9.3 Write property test for magnifier grid size
     - **Property 7: Magnifier Grid Size**
     - **Validates: Requirements 5.1**
   
