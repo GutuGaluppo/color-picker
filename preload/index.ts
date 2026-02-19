@@ -1,12 +1,59 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+export interface DisplayInfo {
+  id: number;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  scaleFactor: number;
+  isPrimary: boolean;
+}
+
+export interface DisplayCapture {
+  displayId: number;
+  dataUrl: string;
+  width: number;
+  height: number;
+  scaleFactor: number;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+export interface VirtualScreenBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface MultiDisplayCapture {
+  displays: DisplayCapture[];
+  virtualBounds: VirtualScreenBounds;
+  timestamp: number;
+}
+
+export interface ColorHistoryItem {
+  hex: string;
+  timestamp: number;
+}
+
 export interface ElectronAPI {
-  captureScreen: () => Promise<{ dataUrl: string; width: number; height: number }>;
+  captureScreen: () => Promise<MultiDisplayCapture>;
   copyToClipboard: (text: string) => Promise<boolean>;
   closeCapture: () => void;
   startCapture: () => void;
   closeExplore: () => void;
   cancelCapture: () => void;
+  addColorToHistory: (hex: string) => Promise<void>;
+  getColorHistory: () => Promise<ColorHistoryItem[]>;
+  onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
 }
 
 const electronAPI: ElectronAPI = {
@@ -16,6 +63,19 @@ const electronAPI: ElectronAPI = {
   startCapture: () => ipcRenderer.send('start-capture'),
   closeExplore: () => ipcRenderer.send('close-explore'),
   cancelCapture: () => ipcRenderer.send('cancel-capture'),
+  addColorToHistory: (hex: string) => ipcRenderer.invoke('add-color-to-history', hex),
+  getColorHistory: () => ipcRenderer.invoke('get-color-history'),
+  onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, displays: DisplayInfo[]) => {
+      callback(displays);
+    };
+    ipcRenderer.on('displays-changed', listener);
+    
+    // Return cleanup function
+    return () => {
+      ipcRenderer.removeListener('displays-changed', listener);
+    };
+  },
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

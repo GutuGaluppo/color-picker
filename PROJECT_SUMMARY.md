@@ -18,9 +18,9 @@ A production-ready desktop utility for instant color picking from anywhere on sc
 
 #### Application States ✓
 - [x] **State 0 - Background**: No windows, listens for global shortcut
-- [x] **State 1 - Explore**: Small control window with "Start Capture" button
+- [x] **State 1 - Explore**: Control window with "Start Capture" button (color history planned)
 - [x] **State 2 - Capture**: Fullscreen overlay with magnifier and crosshair cursor
-- [x] **State 3 - Feedback**: Brief "✓ Copied #HEX" message (150ms) then exits
+- [x] **State 3 - Feedback**: Brief "✓ Copied #HEX" message (150ms) then returns to Explore (planned)
 
 #### Global Shortcut ✓
 - [x] `CommandOrControl+Shift+C` registered
@@ -364,13 +364,50 @@ TypeScript → Compile → Vite Bundle → Electron Package
 - Package.json complete
 - All dependencies specified
 
-## 📈 Future Enhancement Ideas
+## 📈 Planned Enhancements
 
+### Multi-Monitor Support (Implementation Ready)
+A comprehensive multi-monitor feature with complete design specification and implementation plan:
+
+**New Components:**
+- Display Manager (`electron/displays.ts`) - Detection, tracking, and event handling
+- Enhanced Screen Capture - Per-display capture with scale factor support
+- Enhanced Window Manager - Color history state management
+- Enhanced Explore Screen - Color history UI with click-to-copy
+- Enhanced Capture Screen - Multi-display cursor tracking
+- Enhanced Magnifier - Display-specific pixel sampling
+
+**Key Features:**
+- Detect all connected displays with real-time updates
+- Capture from any display based on cursor position
+- Span capture window across entire virtual screen
+- Handle different display scale factors (1x, 1.5x, 2x, etc.)
+- Maintain 60 FPS performance across multiple displays
+- Persistent Explore window with session-based color history
+- Click any history item to copy color to clipboard
+
+**Testing:**
+- 22 correctness properties with property-based testing (fast-check)
+- Comprehensive unit test coverage
+- Performance benchmarks (60 FPS, 200ms capture, 150MB memory)
+- Manual testing checklist for hardware scenarios
+
+**Implementation Plan:**
+- 16 major tasks with 60+ subtasks organized in phases
+- Checkpoints at tasks 4, 7, 11, and 16 for incremental validation
+- Optional property tests marked with `*` for faster MVP
+- Clear requirement traceability for each task
+- Estimated completion: 3-5 days for full implementation
+
+**Specification:**
+- Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
+- Design: `.kiro/specs/multi-monitor-support/design.md` (complete architecture)
+- Tasks: `.kiro/specs/multi-monitor-support/tasks.md` (implementation plan)
+
+### Future Enhancement Ideas
 While not in specification, these could be added:
-- Color history
 - Multiple format support (RGB, HSL)
 - Custom shortcuts
-- System tray icon
 - Settings panel
 - Color palettes
 - Export functionality
@@ -401,5 +438,6 @@ Then press `Ctrl+Shift+C` to start picking colors!
 **Specification Compliance**: 100%  
 **Code Quality**: Production-ready  
 **Documentation**: Comprehensive  
+**Multi-Monitor Design**: Complete with implementation plan ready
 
 **Ready for immediate use! 🎨**

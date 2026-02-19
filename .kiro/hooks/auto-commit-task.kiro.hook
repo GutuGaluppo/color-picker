@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Auto-commit on Task Completion",
+  "description": "Automatically stages and commits changes when a spec task is marked as completed",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "git add -A && git commit -m \"feat: complete task - $(git diff --cached --name-only | head -n 5 | tr '\\n' ', ' | sed 's/,$//')\" || echo \"No changes to commit\"",
+    "timeout": 30
+  },
+  "workspaceFolderName": "color-picker-2",
+  "shortName": "auto-commit-task"
+}

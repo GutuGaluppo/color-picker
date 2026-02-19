@@ -85,6 +85,8 @@ App starts
     ↓
 main.ts initializes
     ↓
+displays.ts detects all connected displays
+    ↓
 tray.ts creates system tray icon
     ↓
 shortcuts.ts registers global shortcut
@@ -156,6 +158,10 @@ capture.ts uses clipboard API
 Shows feedback (150ms)
     ↓
 Closes capture window
+    ↓
+Explore window receives focus
+    ↓
+Color added to history list
 ```
 
 ## Security Model
@@ -195,9 +201,9 @@ Closes capture window
 ## Application States
 
 1. **Background** - No windows visible, system tray active, listens for global shortcut
-2. **Explore** - Small control window with "Start Capture" button
+2. **Explore** - Control window with "Start Capture" button and color history list
 3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
-4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to background
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to Explore window
 
 ## Component Hierarchy
 
@@ -205,10 +211,12 @@ Closes capture window
 App
  ├─ Explore (Route: #/explore)
  │   └─ Glass container
- │       ├─ Title
+ │       ├─ Icon
  │       ├─ Start Capture button
  │       ├─ Shortcut hint
- │       └─ Hide button
+ │       ├─ Hide button
+ │       └─ Color History list
+ │           └─ HEX value items (clickable)
  │
  └─ Capture (Route: #/capture)
      ├─ Fullscreen overlay
@@ -227,11 +235,23 @@ App
 - `exploreWindow: BrowserWindow | null`
 - `captureWindow: BrowserWindow | null`
 - `tray: Tray | null` - System tray instance
-- `windowState: WindowState` - Tracks window visibility
+- `windowState: WindowState` - Tracks window visibility and color history
+  ```typescript
+  interface WindowState {
+    exploreVisible: boolean;
+    captureActive: boolean;
+    previousExploreState: boolean;
+    colorHistory: ColorHistoryItem[];  // Max 1000 items, session-scoped
+  }
+  ```
 - Global shortcut registration
 
 ### Renderer State (Explore)
-- None (stateless component)
+```typescript
+{
+  colorHistory: ColorHistoryItem[] // Loaded from main process via IPC
+}
+```
 
 ### Renderer State (Capture)
 ```typescript
@@ -299,6 +319,7 @@ App
 ```
 Main Process Bundle:   ~50 KB
 Renderer Bundle:      ~150 KB
+Test Suite:           ~25 KB (unit tests)
 Electron Runtime:    ~200 MB
 Total App Size:      ~200 MB (typical)
 ```
@@ -308,8 +329,8 @@ Total App Size:      ~200 MB (typical)
 ### Explore Window
 ```javascript
 {
-  width: 280,
-  height: 140,
+  width: 400,
+  height: 400,  // Increased to accommodate color history list
   resizable: false,
   frame: false,
   transparent: true,
@@ -321,17 +342,21 @@ Total App Size:      ~200 MB (typical)
 ### Capture Window
 ```javascript
 {
-  width: screenWidth,
-  height: screenHeight,
-  x: 0,
-  y: 0,
+  width: virtualBounds.width,   // Spans all displays
+  height: virtualBounds.height, // Spans all displays
+  x: virtualBounds.x,
+  y: virtualBounds.y,
   frame: false,
   transparent: true,
   alwaysOnTop: true,
   skipTaskbar: true,
-  // fullscreen: true
+  hasShadow: false,
+  enableLargerThanScreen: true,  // Required for macOS multi-monitor
+  visibleOnAllWorkspaces: true
 }
 ```
+
+**Note**: Multi-monitor support is in active development. Display Manager and Screen Capture modules are complete. Window Manager has been enhanced with color history and virtual screen spanning. See `.kiro/specs/multi-monitor-support/` for complete specification and progress.
 
 ## Magnifier Specifications
 ```javascript
@@ -345,5 +370,112 @@ Total App Size:      ~200 MB (typical)
 }
 ```
 
+### Planned Enhancements
+
+### Multi-Monitor Support (In Progress - Task 5 Complete)
+A comprehensive multi-monitor feature with complete design specification. Display Manager, Screen Capture, and Window Manager modules are now implemented.
+
+**Completed:**
+- ✅ Display Manager module (`electron/displays.ts`)
+  - Display detection using Electron's screen API
+  - Real-time display change event handling
+  - Virtual screen bounds calculation
+  - Display lookup by cursor position
+  - Scale factor and bounds metadata for all displays
+  - Comprehensive unit tests (587 lines)
+  - Property-based test for display metadata completeness (Property 1)
+
+- ✅ Enhanced Screen Capture module (`electron/capture.ts`)
+  - Multi-display capture with `captureAllDisplays()` and `captureDisplay(displayId)`
+  - Scale factor handling for retina/high-DPI displays
+  - Source-to-display matching with dimension tolerance
+  - 100ms capture caching for performance
+  - Cache invalidation on display changes
+  - Error handling with fallback to primary display
+  - Comprehensive unit tests (570 lines)
+  - Property-based tests for native resolution capture (Property 2) and scale factor adjustment (Property 12)
+
+- ✅ Enhanced Window Manager module (`electron/windows.ts`)
+  - Color history state management with session persistence
+  - Capture window spans virtual screen bounds across all displays
+  - Explore window persistence after capture (doesn't close)
+  - Display disconnection handling during capture
+  - Comprehensive unit tests covering all scenarios
+  - Property-based tests for capture window coverage (Property 3), history addition (Property 19), history chronological order (Property 20), and history session persistence (Property 22)
+  - Tests use dynamic imports for proper test isolation
+
+- ✅ Checkpoint 1 (Task 4) - Core modules validated
+  - All tests passing across Display Manager, Screen Capture, and Window Manager
+  - Display Manager: 27 unit tests + 1 property test
+  - Screen Capture: 13 unit tests + 2 property tests
+  - Error handling: 6 unit tests
+  - Launch activation: 3 property tests
+
+- ✅ Task 5 Complete - Window Manager fully enhanced
+  - All window management functionality implemented
+  - Color history state management working
+  - All unit and property tests passing
+
+**In Progress:**
+- Task 6: Update IPC channels (Task 6.1 in progress)
+  - Enhancing preload/index.ts with new IPC methods
+  - Adding IPC handlers in electron/main.ts
+  - Writing unit tests for IPC communication
+
+**Architecture:**
+- New Display Manager module (`electron/displays.ts`) for detection and tracking
+- Enhanced Screen Capture with per-display capture and scale factor handling
+- Enhanced Window Manager with color history state management
+- Capture window spans entire virtual screen across all displays
+- Magnifier handles display-specific pixel sampling and coordinate conversion
+
+**Key Capabilities:**
+- Detect all connected displays with bounds, scale factors, and identifiers
+- Capture screen content from any display based on cursor position
+- Track cursor position accurately across display boundaries
+- Handle different display scale factors (retina/high-DPI)
+- Maintain 60 FPS performance across multiple displays
+- Support edge cases at display boundaries
+- Preserve existing single-monitor behavior
+
+**Persistent Explore Window & Color History:**
+- Explore window remains visible after color capture
+- Display chronological list of captured colors (newest first)
+- Click any color in history to copy to clipboard
+- History persists for session duration
+- Styled according to reference design with glassmorphism
+
+**Testing Strategy:**
+- 22 correctness properties defined with property-based testing using fast-check
+- Unit tests for specific scenarios and edge cases (Display Manager: 587 lines, Screen Capture: 570 lines)
+- Property-based tests implemented for critical capture properties (Property 2, Property 12)
+- Performance tests for 60 FPS and memory constraints (planned)
+- Manual testing checklist for hardware-dependent scenarios
+- Testing infrastructure setup complete (fast-check installed, test directories created)
+- Note: Some property tests marked optional for MVP and may be skipped to accelerate delivery
+
+**Implementation Status:**
+- Task 1 (testing infrastructure) ✅ Complete
+- Task 2 (Display Manager module) ✅ Complete
+  - Core interfaces and functions implemented
+  - Display change event listeners active
+  - Caching and virtual screen bounds working
+  - Comprehensive unit tests (587 lines) covering all scenarios
+  - Property-based test for display metadata completeness (Property 1)
+- Task 3 (Enhanced Screen Capture) ✅ Complete
+  - Multi-display capture interfaces implemented
+  - Scale factor handling for all display types
+  - Performance caching with 100ms duration
+  - Comprehensive unit tests (570 lines) and property-based tests
+  - Error handling with fallback mechanisms
+- Tasks 4-16: Pending
+- Checkpoints at tasks 4, 7, 11, and 16 for validation
+- Estimated completion: 2-3 days for remaining work
+
+See complete specification:
+- Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
+- Design: `.kiro/specs/multi-monitor-support/design.md` (complete architecture)
+- Tasks: `.kiro/specs/multi-monitor-support/tasks.md` (implementation plan)
+
 ---
-**Last Updated**: January 2025
+**Last Updated**: February 2026

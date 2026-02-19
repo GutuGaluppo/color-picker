@@ -11,6 +11,8 @@ A fast, silent, and non-intrusive desktop color picker utility built with Electr
 - ⚡ **Fast & Silent** - Minimal feedback, exits immediately after capture
 - 🪟 **Frameless UI** - Clean, glassmorphism design
 - 🔄 **Background Operation** - Runs persistently in system tray until explicitly quit
+- 📜 **Color History** - View and reuse previously captured colors (implementation ready)
+- 🖥️ **Multi-Monitor Support** - Pick colors from any connected display (implementation ready)
 
 ## Installation
 
@@ -62,9 +64,9 @@ Note: Closing windows does not quit the app. Use the system tray menu to quit.
 ## Application States
 
 1. **Background** - No windows visible, system tray active, listens for global shortcut
-2. **Explore** - Small control window with "Start Capture" button
+2. **Explore** - Control window with "Start Capture" button and color history
 3. **Capture** - Fullscreen overlay with magnifier and crosshair cursor
-4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to background
+4. **Feedback** - Brief "✓ Copied #HEX" message (150ms) then returns to Explore window
 
 ## Tech Stack
 

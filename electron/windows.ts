@@ -1,16 +1,24 @@
 import { BrowserWindow, screen } from "electron";
 import path from "path";
+import { getVirtualScreenBounds } from "./displays";
+
+export interface ColorHistoryItem {
+  hex: string;
+  timestamp: number;
+}
 
 interface WindowState {
   exploreVisible: boolean;
   captureActive: boolean;
   previousExploreState: boolean;
+  colorHistory: ColorHistoryItem[];
 }
 
 let windowState: WindowState = {
   exploreVisible: false,
   captureActive: false,
-  previousExploreState: false
+  previousExploreState: false,
+  colorHistory: []
 };
 let exploreWindow: BrowserWindow | null = null;
 let captureWindow: BrowserWindow | null = null;
@@ -50,6 +58,7 @@ export function createExploreWindow(): BrowserWindow {
   exploreWindow.on("close", (event) => {
     event.preventDefault();
     exploreWindow?.hide();
+    windowState.exploreVisible = false;
   });
 
   exploreWindow.on("closed", () => {
@@ -67,14 +76,14 @@ export function createCaptureWindow(): BrowserWindow {
     return captureWindow;
   }
 
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.bounds;
+  // Use virtual screen bounds to span all displays
+  const virtualBounds = getVirtualScreenBounds();
 
   captureWindow = new BrowserWindow({
-    width,
-    height,
-    x: 0,
-    y: 0,
+    width: virtualBounds.width,
+    height: virtualBounds.height,
+    x: virtualBounds.x,
+    y: virtualBounds.y,
     resizable: false,
     movable: false,
     frame: false,
@@ -149,5 +158,53 @@ export function showExploreWindow(): void {
 export function restoreExploreWindowState(): void {
   if (windowState.previousExploreState) {
     showExploreWindow();
+  }
+}
+
+/**
+ * Add a color to the history
+ */
+export function addColorToHistory(hex: string): void {
+  const historyItem: ColorHistoryItem = {
+    hex,
+    timestamp: Date.now()
+  };
+  
+  // Add to beginning of array (most recent first)
+  windowState.colorHistory.unshift(historyItem);
+  
+  // Trim to last 1000 items if exceeded
+  if (windowState.colorHistory.length > 1000) {
+    windowState.colorHistory = windowState.colorHistory.slice(0, 1000);
+  }
+}
+
+/**
+ * Get the color history
+ */
+export function getColorHistory(): ColorHistoryItem[] {
+  return [...windowState.colorHistory];
+}
+
+/**
+ * Clear the color history
+ */
+export function clearColorHistory(): void {
+  windowState.colorHistory = [];
+}
+
+/**
+ * Resize capture window to match current virtual screen bounds
+ * Called when displays are added/removed during capture
+ */
+export function resizeCaptureWindow(): void {
+  if (captureWindow && !captureWindow.isDestroyed()) {
+    const virtualBounds = getVirtualScreenBounds();
+    captureWindow.setBounds({
+      x: virtualBounds.x,
+      y: virtualBounds.y,
+      width: virtualBounds.width,
+      height: virtualBounds.height
+    });
   }
 }

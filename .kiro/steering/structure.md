@@ -9,6 +9,7 @@ color-picker/
 │   ├── windows.ts    # Window creation and management
 │   ├── shortcuts.ts  # Global keyboard shortcuts
 │   ├── capture.ts    # Screen capture and clipboard
+│   ├── displays.ts   # Multi-monitor detection and management
 │   └── assets/       # Tray icons and app icons
 ├── preload/          # Secure IPC bridge
 │   └── index.ts      # contextBridge API exposure
@@ -24,6 +25,10 @@ color-picker/
 │   │   └── color.ts      # RGB/HEX conversion
 │   └── styles/       # CSS modules
 │       └── glass.css     # Glassmorphism effects
+├── tests/            # Test suite
+│   ├── unit/         # Unit tests
+│   │   └── displays.test.ts  # Display Manager tests
+│   └── property/     # Property-based tests (planned)
 ├── dist-electron/    # Compiled main process (gitignored)
 ├── dist/             # Compiled renderer (gitignored)
 └── node_modules/     # Dependencies (gitignored)

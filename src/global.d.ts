@@ -1,14 +1,61 @@
 export {};
 
 declare global {
+  interface DisplayInfo {
+    id: number;
+    bounds: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+    scaleFactor: number;
+    isPrimary: boolean;
+  }
+
+  interface DisplayCapture {
+    displayId: number;
+    dataUrl: string;
+    width: number;
+    height: number;
+    scaleFactor: number;
+    bounds: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+  }
+
+  interface VirtualScreenBounds {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
+
+  interface MultiDisplayCapture {
+    displays: DisplayCapture[];
+    virtualBounds: VirtualScreenBounds;
+    timestamp: number;
+  }
+
+  interface ColorHistoryItem {
+    hex: string;
+    timestamp: number;
+  }
+
   interface Window {
     electronAPI: {
-      captureScreen: () => Promise<{ dataUrl: string; width: number; height: number }>;
+      captureScreen: () => Promise<MultiDisplayCapture>;
       copyToClipboard: (text: string) => Promise<boolean>;
       closeCapture: () => void;
       startCapture: () => void;
       closeExplore: () => void;
       cancelCapture: () => void;
+      addColorToHistory: (hex: string) => Promise<void>;
+      getColorHistory: () => Promise<ColorHistoryItem[]>;
+      onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
     };
   }
 }

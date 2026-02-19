@@ -9,8 +9,9 @@ import {
   getExploreWindow
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
-import { captureScreen, copyToClipboard } from './capture';
+import { captureScreen, copyToClipboard, invalidateCaptureCache } from './capture';
 import { createTray, destroyTray } from './tray';
+import { initializeDisplayListeners, cleanupDisplayListeners, DisplayInfo } from './displays';
 
 // Request single instance lock to prevent duplicate launches
 const gotTheLock = app.requestSingleInstanceLock();
@@ -34,6 +35,12 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
+    // Initialize display change listeners to invalidate capture cache
+    initializeDisplayListeners((displays: DisplayInfo[]) => {
+      console.log('[Main] Display configuration changed:', displays.length, 'displays');
+      invalidateCaptureCache();
+    });
+
     // Try to create system tray, fallback to showing window if it fails
     try {
       createTray();
@@ -60,6 +67,7 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   unregisterGlobalShortcuts();
+  cleanupDisplayListeners();
 });
 
 app.on('before-quit', () => {
