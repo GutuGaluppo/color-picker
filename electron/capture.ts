@@ -35,6 +35,8 @@ interface CaptureCache {
 
 let captureCache: CaptureCache | null = null;
 const CACHE_DURATION_MS = 100;
+const CAPTURE_TIMEOUT_MS = 5000;
+const DIMENSION_TOLERANCE = 10;
 
 export async function captureScreen(): Promise<CaptureResult> {
   const primaryDisplay = screen.getPrimaryDisplay();
@@ -62,6 +64,7 @@ export async function captureScreen(): Promise<CaptureResult> {
  * Capture all connected displays
  * Returns capture data for each display with metadata
  * Uses cache to avoid redundant captures within 100ms
+ * Implements timeout and error handling
  */
 export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
   // Check cache
@@ -73,17 +76,30 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
   const displays = getAllDisplays();
   const virtualBounds = getVirtualScreenBounds();
 
-  // Get all screen sources
-  const sources = await desktopCapturer.getSources({
+  // Implement timeout for capture
+  const capturePromise = desktopCapturer.getSources({
     types: ['screen'],
     thumbnailSize: { width: 0, height: 0 } // Request native resolution
   });
 
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('Screen capture timeout')), CAPTURE_TIMEOUT_MS);
+  });
+
+  let sources;
+  try {
+    sources = await Promise.race([capturePromise, timeoutPromise]);
+  } catch (error) {
+    console.error('[Screen Capture] Failed to get sources:', error);
+    throw new Error(`Screen capture failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
   if (sources.length === 0) {
+    console.error('[Screen Capture] No screen sources available');
     throw new Error('No screen sources available');
   }
 
-  // Match sources to displays by dimensions
+  // Match sources to displays by dimensions with tolerance
   const displayCaptures: DisplayCapture[] = [];
 
   for (const display of displays) {
@@ -91,10 +107,9 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
     const expectedHeight = Math.round(display.bounds.height * display.scaleFactor);
 
     // Find matching source with tolerance for rounding differences
-    const tolerance = 10;
     const matchingSource = sources.find(source => {
-      const widthMatch = Math.abs(source.thumbnail.getSize().width - expectedWidth) <= tolerance;
-      const heightMatch = Math.abs(source.thumbnail.getSize().height - expectedHeight) <= tolerance;
+      const widthMatch = Math.abs(source.thumbnail.getSize().width - expectedWidth) <= DIMENSION_TOLERANCE;
+      const heightMatch = Math.abs(source.thumbnail.getSize().height - expectedHeight) <= DIMENSION_TOLERANCE;
       return widthMatch && heightMatch;
     });
 
@@ -110,10 +125,31 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
       });
     } else {
       console.warn(`[Screen Capture] Could not match source for display ${display.id} (expected ${expectedWidth}x${expectedHeight})`);
+      
+      // Try to match with increased tolerance
+      const relaxedMatch = sources.find(source => {
+        const widthMatch = Math.abs(source.thumbnail.getSize().width - expectedWidth) <= DIMENSION_TOLERANCE * 2;
+        const heightMatch = Math.abs(source.thumbnail.getSize().height - expectedHeight) <= DIMENSION_TOLERANCE * 2;
+        return widthMatch && heightMatch;
+      });
+      
+      if (relaxedMatch) {
+        console.log(`[Screen Capture] Matched display ${display.id} with relaxed tolerance`);
+        const thumbnail = relaxedMatch.thumbnail;
+        displayCaptures.push({
+          displayId: display.id,
+          dataUrl: thumbnail.toDataURL(),
+          width: thumbnail.getSize().width,
+          height: thumbnail.getSize().height,
+          scaleFactor: display.scaleFactor,
+          bounds: display.bounds,
+        });
+      }
     }
   }
 
   if (displayCaptures.length === 0) {
+    console.error('[Screen Capture] Could not match any capture sources to displays');
     throw new Error('Could not match any capture sources to displays');
   }
 
