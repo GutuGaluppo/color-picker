@@ -4,7 +4,7 @@ import { rgbToHex, getPixelFromImageData } from "../shared/color";
 interface MagnifierProps {
   x: number;
   y: number;
-  screenImage: HTMLImageElement | null;
+  displayCapture: DisplayCapture | null;
   onColorChange: (color: string) => void;
 }
 
@@ -18,17 +18,42 @@ const RADIUS = MAGNIFIER_SIZE / 2;
 export const Magnifier: React.FC<MagnifierProps> = ({
   x,
   y,
-  screenImage,
+  displayCapture,
   onColorChange,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const screenImageRef = useRef<HTMLImageElement | null>(null);
+
+  // Load display capture image
+  useEffect(() => {
+    if (!displayCapture) return;
+
+    const img = new Image();
+    img.onload = () => {
+      screenImageRef.current = img;
+    };
+    img.src = displayCapture.dataUrl;
+
+    return () => {
+      screenImageRef.current = null;
+    };
+  }, [displayCapture]);
 
   useEffect(() => {
-    if (!canvasRef.current || !screenImage) return;
+    if (!canvasRef.current || !displayCapture || !screenImageRef.current) return;
 
+    const screenImage = screenImageRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+
+    // Convert screen coordinates to display-local coordinates
+    const localX = x - displayCapture.bounds.x;
+    const localY = y - displayCapture.bounds.y;
+
+    // Apply scale factor for pixel sampling
+    const scaledX = localX * displayCapture.scaleFactor;
+    const scaledY = localY * displayCapture.scaleFactor;
 
     ctx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     ctx.imageSmoothingEnabled = false;
@@ -45,8 +70,8 @@ export const Magnifier: React.FC<MagnifierProps> = ({
     // 2. Calculate source region
     // =========================
     const halfGrid = Math.floor(GRID_SIZE / 2);
-    const sourceX = Math.max(0, x - halfGrid);
-    const sourceY = Math.max(0, y - halfGrid);
+    const sourceX = Math.max(0, scaledX - halfGrid);
+    const sourceY = Math.max(0, scaledY - halfGrid);
 
     ctx.drawImage(
       screenImage,
@@ -112,7 +137,7 @@ export const Magnifier: React.FC<MagnifierProps> = ({
     const pixel = getPixelFromImageData(imageData, 0, 0);
     const hexColor = rgbToHex(pixel.r, pixel.g, pixel.b);
     onColorChange(hexColor);
-  }, [x, y, screenImage, onColorChange]);
+  }, [x, y, displayCapture, onColorChange]);
 
   return (
     <div

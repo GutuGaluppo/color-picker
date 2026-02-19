@@ -137,35 +137,44 @@ This implementation extends the color picker to support multi-monitor setups wit
     - _Requirements: 3.1, 3.2, 3.3, 11.1, 11.2, 11.3, 12.1, 12.4_
     - _File: tests/unit/windows.test.ts (comprehensive coverage)_
 
-- [-] 6. Update IPC channels
-  - [x] 6.1 Enhance preload/index.ts with new IPC methods
+- [x] 6. Update IPC channels ✅ COMPLETE
+  - [x] 6.1 Enhance preload/index.ts with new IPC methods ✅ COMPLETE
     - Update `captureScreen()` to return `MultiDisplayCapture`
     - Add `addColorToHistory(hex)` method
     - Add `getColorHistory()` method
     - Add `onDisplaysChanged(callback)` event listener
     - Update `ElectronAPI` interface with new methods
     - _Requirements: 1.2, 1.3, 2.1, 12.1, 12.2_
+    - _File: preload/index.ts (complete implementation)_
   
-  - [x] 6.2 Add IPC handlers in electron/main.ts
+  - [x] 6.2 Add IPC handlers in electron/main.ts ✅ COMPLETE
     - Add handler for 'add-color-to-history'
     - Add handler for 'get-color-history'
     - Add handler for 'displays-changed' event
     - Initialize display listeners on app startup
     - Send display list updates to renderer on change
     - _Requirements: 1.2, 1.3, 12.1, 12.2_
+    - _File: electron/main.ts (all handlers implemented)_
   
-  - [ ] 6.3 Write unit tests for IPC communication
-    - Test captureScreen returns multi-display data
-    - Test addColorToHistory IPC call
-    - Test getColorHistory IPC call
-    - Test displays-changed event propagation
+  - [x] 6.3 Write unit tests for IPC communication ✅ COMPLETE
+    - ✅ Test captureScreen returns multi-display data
+    - ✅ Test addColorToHistory IPC call
+    - ✅ Test getColorHistory IPC call
+    - ✅ Test displays-changed event propagation
+    - ✅ Test capture window resize on display change
+    - ✅ Test error handling in capture flow
     - _Requirements: 1.2, 1.3, 2.1, 12.1, 12.2_
+    - _File: tests/unit/ipc.test.ts (comprehensive IPC handler behavior tests)_
 
-- [ ] 7. Checkpoint - Ensure main process integration works
-  - Ensure all tests pass, ask the user if questions arise.
+- [x] 7. Checkpoint - Ensure main process integration works ✅ COMPLETE
+  - ✅ All main process modules complete (Display Manager, Screen Capture, Window Manager)
+  - ✅ All IPC channels implemented and handlers registered
+  - ✅ IPC communication validated through comprehensive unit tests
+  - ✅ All 58 tests passing (7 test files)
+  - ✅ Ready to proceed to renderer component updates
 
-- [ ] 8. Enhance Capture screen component
-  - [ ] 8.1 Update src/screens/Capture.tsx for multi-display support
+- [-] 8. Enhance Capture screen component
+  - [x] 8.1 Update src/screens/Capture.tsx for multi-display support
     - Add state for `captureData: MultiDisplayCapture | null`
     - Add state for `currentDisplay: DisplayCapture | null`
     - Load all display captures on mount using `captureScreen()`

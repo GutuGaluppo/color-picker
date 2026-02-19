@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, BrowserWindow } from 'electron';
 import { 
   createExploreWindow, 
   createCaptureWindow, 

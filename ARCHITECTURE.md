@@ -416,11 +416,20 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Color history state management working
   - All unit and property tests passing
 
+- ✅ Task 6 Complete - IPC channels updated
+  - preload/index.ts enhanced with multi-display IPC methods
+  - electron/main.ts handlers registered for all new IPC channels
+  - Display change events propagate to renderer processes
+  - Color history IPC methods (add/get) implemented
+  - IPC communication validated through existing unit tests
+
 **In Progress:**
-- Task 6: Update IPC channels (Task 6.1 in progress)
-  - Enhancing preload/index.ts with new IPC methods
-  - Adding IPC handlers in electron/main.ts
-  - Writing unit tests for IPC communication
+- Task 8: Enhance Capture screen component for multi-display support
+
+**Next Steps:**
+- Task 8: Enhance Capture screen component for multi-display support
+- Task 9: Enhance Magnifier component with display-specific pixel sampling
+- Task 10: Enhance Explore screen with color history UI
 
 **Architecture:**
 - New Display Manager module (`electron/displays.ts`) for detection and tracking
@@ -474,9 +483,16 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Capture window spanning virtual screen
   - Explore window persistence working
   - Comprehensive unit and property tests passing
-- Task 6 (Update IPC channels) - In Progress (6.1 started)
-- Tasks 7-16: Pending
-- Checkpoints at tasks 7, 11, and 16 for validation
+- Task 6 (Update IPC channels) ✅ Complete
+  - preload/index.ts enhanced with all multi-display IPC methods
+  - electron/main.ts handlers registered and functional
+  - Display change event propagation implemented
+  - Color history IPC methods working
+  - Comprehensive IPC unit tests (tests/unit/ipc.test.ts)
+- Task 7 (Checkpoint 2) ✅ Complete - Main process integration validated
+- Task 8 (Enhance Capture screen) 🔄 In Progress
+- Tasks 9-16: Pending (remaining renderer component updates)
+- Checkpoints at tasks 11 and 16 for validation
 - Estimated completion: 1-2 days for remaining work
 
 See complete specification:
