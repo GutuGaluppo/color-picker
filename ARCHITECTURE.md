@@ -586,8 +586,14 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - Property-based tests covering critical magnifier properties
   - Unit tests providing comprehensive coverage of component logic
   - Ready to proceed to color utilities and error handling
-- Tasks 12-16: Pending (color utilities, error handling, integration)
-  - Task 12.2 (RGB to HEX conversion property test) promoted to required for MVP
+- Task 12 (Color conversion utilities) 🔄 In Progress
+  - Task 12.1: Verifying RGB/HEX conversion functions in src/shared/color.ts
+    - rgbToHex() function exists ✅
+    - hexToRgb() function needs implementation
+  - Task 12.2: RGB to HEX conversion property test (promoted to required for MVP)
+  - Task 12.3: Color copy accuracy property test
+  - Task 12.4: Unit tests for color utilities (promoted to required for MVP)
+- Tasks 13-16: Pending (error handling, backward compatibility, integration)
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)
