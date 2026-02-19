@@ -401,7 +401,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
 - ✅ Enhanced Screen Capture module (`electron/capture.ts`)
   - Multi-display capture with `captureAllDisplays()` and `captureDisplay(displayId)`
   - Scale factor handling for retina/high-DPI displays
-  - Source-to-display matching with dimension tolerance
+  - Source-to-display matching by name pattern and index fallback (more reliable than dimension matching)
   - 100ms capture caching for performance
   - Cache invalidation on display changes
   - Error handling with fallback to primary display
@@ -617,8 +617,8 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Null return for invalid display lookups
   - ✅ Task 13.2: Add error handling to Screen Capture (complete)
     - 5-second timeout for desktopCapturer.getSources()
-    - Dimension tolerance (±10px) for source-to-display matching
-    - Relaxed tolerance fallback (±20px) for difficult matches
+    - Name pattern matching (e.g., "Screen 1" → Display 1) with index fallback
+    - More reliable than dimension-based matching which can fail due to scaling
     - Proper error messages and logging
     - No sources available error handling
   - ✅ Task 13.3: Add error handling to Magnifier (complete)
@@ -680,7 +680,10 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Tests multi-display capture flow
     - File: tests/integration/capture-flow.test.ts
   - ✅ All integration complete: Display Manager, Screen Capture, Window Manager, IPC channels, and renderer components fully wired and functional
-- Task 16: Final checkpoint (pending - awaiting user confirmation for test execution)
+- Task 16: Final checkpoint 🔄 In Progress
+  - All implementation tasks complete (Tasks 1-15)
+  - Comprehensive test suite in place (216+ tests across 16 test files)
+  - Awaiting final test execution and validation
 
 See complete specification:
 - Requirements: `.kiro/specs/multi-monitor-support/requirements.md` (13 requirements)

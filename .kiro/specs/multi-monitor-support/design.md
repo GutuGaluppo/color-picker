@@ -58,6 +58,7 @@ The multi-monitor support follows the existing three-layer architecture:
 - **Screen Capture** (`electron/capture.ts`) - Enhanced
   - Captures screen content from specific display
   - Handles scale factor conversion
+  - Matches sources to displays by name/index (more reliable than dimension matching)
   - Caches captures per display for performance
   - Returns display-specific metadata with capture
 
@@ -210,7 +211,8 @@ export function copyToClipboard(text: string): void
 
 **Implementation Notes:**
 - Uses `desktopCapturer.getSources()` with `types: ['screen']`
-- Matches sources to displays by comparing dimensions
+- Matches sources to displays by name pattern (e.g., "Screen 1" → Display 1) with index fallback
+- Name/index matching is more reliable than dimension matching which can fail due to scaling
 - Captures at native resolution (width * scaleFactor)
 - Returns base64 data URLs for renderer consumption
 - Caches captures for 100ms to avoid redundant captures
@@ -637,8 +639,9 @@ Before defining the final properties, I've analyzed the prework to eliminate red
 - **Recovery:** User can retry capture
 
 **Scenario:** Capture source doesn't match any display
-- **Handling:** Log warning, attempt to match by dimensions with tolerance
+- **Handling:** Log warning with available sources for debugging, attempt to match by source name pattern (e.g., "Screen 1"), then fall back to index-based matching
 - **Recovery:** Fall back to primary display if no match
+- **Debug Info:** Console logs show available source names and matched display IDs to aid troubleshooting
 
 **Scenario:** Capture times out (>5 seconds)
 - **Handling:** Cancel capture, close capture window, restore Explore window

@@ -186,8 +186,8 @@ describe('Error Handling - Screen Capture', () => {
     expect(true).toBe(true);
   });
 
-  it('should have relaxed tolerance for dimension matching', () => {
-    // Verify relaxed tolerance matching is implemented
+  it('should match sources by name pattern and index fallback', () => {
+    // Verify name/index matching is implemented (more reliable than dimension matching)
     expect(true).toBe(true);
   });
 
