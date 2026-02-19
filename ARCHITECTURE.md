@@ -616,7 +616,10 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Proper error messages and logging
     - No sources available error handling
   - Task 13.3: Add error handling to Magnifier (pending)
-  - Task 13.4: Add memory management (pending)
+  - ⏸️ Task 13.4: Add memory management (deferred)
+    - Capture cache clearing when memory exceeds 150MB
+    - History trimming to last 1000 items
+    - Deferred as optimization feature for post-MVP
   - Task 13.5: Write unit tests for error handling (pending)
 - Tasks 14-16: Pending (backward compatibility, integration, final checkpoint)
 

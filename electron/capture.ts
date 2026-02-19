@@ -37,6 +37,7 @@ let captureCache: CaptureCache | null = null;
 const CACHE_DURATION_MS = 100;
 const CAPTURE_TIMEOUT_MS = 5000;
 const DIMENSION_TOLERANCE = 10;
+const MEMORY_LIMIT_BYTES = 150 * 1024 * 1024; // 150MB
 
 export async function captureScreen(): Promise<CaptureResult> {
   const primaryDisplay = screen.getPrimaryDisplay();
@@ -201,6 +202,26 @@ export async function captureDisplay(displayId: number): Promise<DisplayCapture>
  */
 export function invalidateCaptureCache(): void {
   captureCache = null;
+}
+
+/**
+ * Check memory usage and clear cache if needed
+ * Clears capture cache when memory exceeds 150MB
+ */
+export function checkMemoryUsage(): void {
+  const memoryUsage = process.memoryUsage();
+  const totalMemory = memoryUsage.heapUsed + memoryUsage.external;
+  
+  if (totalMemory > MEMORY_LIMIT_BYTES) {
+    console.warn(`[Screen Capture] Memory usage (${Math.round(totalMemory / 1024 / 1024)}MB) exceeds limit (${MEMORY_LIMIT_BYTES / 1024 / 1024}MB), clearing cache`);
+    invalidateCaptureCache();
+    
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+      console.log('[Screen Capture] Forced garbage collection');
+    }
+  }
 }
 
 export function copyToClipboard(text: string): void {

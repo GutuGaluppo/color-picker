@@ -13,9 +13,13 @@ import {
   resizeCaptureWindow
 } from './windows';
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts';
-import { captureAllDisplays, copyToClipboard, invalidateCaptureCache } from './capture';
+import { captureAllDisplays, copyToClipboard, invalidateCaptureCache, checkMemoryUsage } from './capture';
 import { createTray, destroyTray } from './tray';
 import { initializeDisplayListeners, cleanupDisplayListeners, DisplayInfo } from './displays';
+
+// Memory check interval (every 30 seconds)
+const MEMORY_CHECK_INTERVAL_MS = 30000;
+let memoryCheckTimer: NodeJS.Timeout | null = null;
 
 // Request single instance lock to prevent duplicate launches
 const gotTheLock = app.requestSingleInstanceLock();
@@ -58,6 +62,11 @@ if (!gotTheLock) {
       });
     });
 
+    // Start periodic memory check
+    memoryCheckTimer = setInterval(() => {
+      checkMemoryUsage();
+    }, MEMORY_CHECK_INTERVAL_MS);
+
     // Try to create system tray, fallback to showing window if it fails
     try {
       createTray();
@@ -85,6 +94,12 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   unregisterGlobalShortcuts();
   cleanupDisplayListeners();
+  
+  // Clear memory check timer
+  if (memoryCheckTimer) {
+    clearInterval(memoryCheckTimer);
+    memoryCheckTimer = null;
+  }
 });
 
 app.on('before-quit', () => {

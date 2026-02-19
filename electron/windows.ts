@@ -14,6 +14,8 @@ interface WindowState {
   colorHistory: ColorHistoryItem[];
 }
 
+const MAX_HISTORY_ITEMS = 1000;
+
 let windowState: WindowState = {
   exploreVisible: false,
   captureActive: false,
@@ -163,6 +165,7 @@ export function restoreExploreWindowState(): void {
 
 /**
  * Add a color to the history
+ * Automatically trims to last 1000 items if exceeded
  */
 export function addColorToHistory(hex: string): void {
   const historyItem: ColorHistoryItem = {
@@ -174,8 +177,9 @@ export function addColorToHistory(hex: string): void {
   windowState.colorHistory.unshift(historyItem);
   
   // Trim to last 1000 items if exceeded
-  if (windowState.colorHistory.length > 1000) {
-    windowState.colorHistory = windowState.colorHistory.slice(0, 1000);
+  if (windowState.colorHistory.length > MAX_HISTORY_ITEMS) {
+    console.log(`[Window Manager] History exceeded ${MAX_HISTORY_ITEMS} items, trimming to limit`);
+    windowState.colorHistory = windowState.colorHistory.slice(0, MAX_HISTORY_ITEMS);
   }
 }
 
