@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 
 // Mock Electron modules
@@ -16,7 +16,7 @@ vi.mock('electron', () => ({
 }));
 
 import { screen } from 'electron';
-import { getAllDisplays, getDisplayAtPoint, getVirtualScreenBounds } from '../../electron/displays';
+import { getAllDisplays, getDisplayAtPoint, getVirtualScreenBounds, cleanupDisplayListeners } from '../../electron/displays';
 
 // Helper to create mock Electron Display object
 function createMockElectronDisplay(config: {
@@ -63,13 +63,34 @@ function createMockElectronDisplay(config: {
   };
 }
 
+// Helper to setup single display mocks
+function setupSingleDisplayMock(config: {
+  width: number;
+  height: number;
+  scaleFactor: number;
+  x?: number;
+  y?: number;
+}) {
+  const mockDisplay = createMockElectronDisplay({
+    id: 1,
+    x: config.x ?? 0,
+    y: config.y ?? 0,
+    width: config.width,
+    height: config.height,
+    scaleFactor: config.scaleFactor,
+  });
+
+  vi.mocked(screen.getAllDisplays).mockReturnValue([mockDisplay]);
+  vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay);
+  vi.mocked(screen.getDisplayNearestPoint).mockReturnValue(mockDisplay);
+  
+  return mockDisplay;
+}
+
 describe('Backward Compatibility - Property-Based Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    vi.clearAllMocks();
+    cleanupDisplayListeners();
   });
 
   describe('Property 18: Single Display Backward Compatibility', () => {
@@ -88,18 +109,12 @@ describe('Backward Compatibility - Property-Based Tests', () => {
             y: fc.integer({ min: 0, max: 0 }),
           }),
           (displayConfig) => {
+            // Clear cache and mocks for each iteration
+            cleanupDisplayListeners();
+            vi.clearAllMocks();
+            
             // Setup single display
-            const mockDisplay = createMockElectronDisplay({
-              id: 1,
-              x: displayConfig.x,
-              y: displayConfig.y,
-              width: displayConfig.width,
-              height: displayConfig.height,
-              scaleFactor: displayConfig.scaleFactor,
-            });
-
-            vi.mocked(screen.getAllDisplays).mockReturnValue([mockDisplay]);
-            vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay);
+            const mockDisplay = setupSingleDisplayMock(displayConfig);
 
             // Get displays from our implementation
             const displays = getAllDisplays();
@@ -151,6 +166,9 @@ describe('Backward Compatibility - Property-Based Tests', () => {
               { x: displayConfig.x + displayConfig.width - 10, y: displayConfig.y + displayConfig.height - 10 }, // Bottom-right
             ];
 
+            // Mock getDisplayNearestPoint to return the display for points within bounds
+            vi.mocked(screen.getDisplayNearestPoint).mockReturnValue(mockDisplay);
+
             for (const point of testPoints) {
               const foundDisplay = getDisplayAtPoint(point.x, point.y);
               if (!foundDisplay || foundDisplay.id !== display.id) {
@@ -158,14 +176,18 @@ describe('Backward Compatibility - Property-Based Tests', () => {
               }
             }
 
-            // 7. Points outside display bounds must return null (or primary as fallback)
+            // 7. Points outside display bounds should fall back to nearest display (primary for single display)
             const outsidePoint = {
               x: displayConfig.x + displayConfig.width + 100,
               y: displayConfig.y + displayConfig.height + 100,
             };
+            
+            // Mock getDisplayNearestPoint to return the single display (nearest display behavior)
+            vi.mocked(screen.getDisplayNearestPoint).mockReturnValue(mockDisplay);
+            
             const outsideDisplay = getDisplayAtPoint(outsidePoint.x, outsidePoint.y);
-            // Either null or falls back to primary display (both acceptable for single display)
-            if (outsideDisplay !== null && outsideDisplay.id !== display.id) {
+            // For single display, should return the display (nearest display fallback)
+            if (outsideDisplay === null || outsideDisplay.id !== display.id) {
               return false;
             }
 
@@ -193,18 +215,12 @@ describe('Backward Compatibility - Property-Based Tests', () => {
             cursorY: fc.integer({ min: 10, max: 1000 }),
           }),
           ({ display, cursorX, cursorY }) => {
+            // Clear cache and mocks for each iteration
+            cleanupDisplayListeners();
+            vi.clearAllMocks();
+            
             // Setup single display at origin
-            const mockDisplay = createMockElectronDisplay({
-              id: 1,
-              x: 0,
-              y: 0,
-              width: display.width,
-              height: display.height,
-              scaleFactor: display.scaleFactor,
-            });
-
-            vi.mocked(screen.getAllDisplays).mockReturnValue([mockDisplay]);
-            vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay);
+            setupSingleDisplayMock(display);
 
             const displays = getAllDisplays();
 
@@ -277,18 +293,11 @@ describe('Backward Compatibility - Property-Based Tests', () => {
             scaleFactor: fc.constantFrom(1.0, 1.5, 2.0),
           }),
           (displayConfig) => {
-            // Setup single display at origin
-            const mockDisplay = createMockElectronDisplay({
-              id: 1,
-              x: 0,
-              y: 0,
-              width: displayConfig.width,
-              height: displayConfig.height,
-              scaleFactor: displayConfig.scaleFactor,
-            });
-
-            vi.mocked(screen.getAllDisplays).mockReturnValue([mockDisplay]);
-            vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay);
+            // Clear cache first
+            cleanupDisplayListeners();
+            
+            // Setup single display at origin (this will populate the cache)
+            setupSingleDisplayMock(displayConfig);
 
             // Get virtual screen bounds (used for capture window)
             const virtualBounds = getVirtualScreenBounds();
@@ -308,16 +317,12 @@ describe('Backward Compatibility - Property-Based Tests', () => {
             const newVersionBounds = virtualBounds;
 
             // Verify bounds are identical
-            if (
-              previousVersionBounds.x !== newVersionBounds.x ||
-              previousVersionBounds.y !== newVersionBounds.y ||
-              previousVersionBounds.width !== newVersionBounds.width ||
-              previousVersionBounds.height !== newVersionBounds.height
-            ) {
-              return false;
-            }
-
-            return true;
+            return (
+              previousVersionBounds.x === newVersionBounds.x &&
+              previousVersionBounds.y === newVersionBounds.y &&
+              previousVersionBounds.width === newVersionBounds.width &&
+              previousVersionBounds.height === newVersionBounds.height
+            );
           }
         ),
         { numRuns: 100 }

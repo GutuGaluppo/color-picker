@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { app, globalShortcut, Tray, nativeImage } from 'electron';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { globalShortcut, Tray, nativeImage } from 'electron';
 
 // Mock Electron modules
 vi.mock('electron', () => ({
