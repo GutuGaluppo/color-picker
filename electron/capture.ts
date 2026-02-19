@@ -77,10 +77,15 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
   const displays = getAllDisplays();
   const virtualBounds = getVirtualScreenBounds();
 
+  // Calculate maximum dimensions needed for capture
+  // We need to capture at physical pixel resolution (logical * scaleFactor)
+  const maxWidth = Math.max(...displays.map(d => Math.round(d.bounds.width * d.scaleFactor)));
+  const maxHeight = Math.max(...displays.map(d => Math.round(d.bounds.height * d.scaleFactor)));
+
   // Implement timeout for capture
   const capturePromise = desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: { width: 0, height: 0 } // Request native resolution
+    thumbnailSize: { width: maxWidth, height: maxHeight }
   });
 
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -100,52 +105,44 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
     throw new Error('No screen sources available');
   }
 
-  // Match sources to displays by dimensions with tolerance
+  // Match sources to displays by index (Screen 1 -> Display 1, Screen 2 -> Display 2)
+  // This is more reliable than dimension matching which can fail due to scaling issues
   const displayCaptures: DisplayCapture[] = [];
 
-  for (const display of displays) {
-    const expectedWidth = Math.round(display.bounds.width * display.scaleFactor);
-    const expectedHeight = Math.round(display.bounds.height * display.scaleFactor);
-
-    // Find matching source with tolerance for rounding differences
-    const matchingSource = sources.find(source => {
-      const widthMatch = Math.abs(source.thumbnail.getSize().width - expectedWidth) <= DIMENSION_TOLERANCE;
-      const heightMatch = Math.abs(source.thumbnail.getSize().height - expectedHeight) <= DIMENSION_TOLERANCE;
-      return widthMatch && heightMatch;
+  for (let i = 0; i < displays.length; i++) {
+    const display = displays[i];
+    
+    // Try to match by source name first (e.g., "Screen 1" matches display with id 1)
+    let matchingSource = sources.find(source => {
+      const match = source.name.match(/Screen (\d+)/);
+      if (match) {
+        const screenNumber = parseInt(match[1]);
+        return screenNumber === display.id;
+      }
+      return false;
     });
+
+    // Fallback: match by index if name matching fails
+    if (!matchingSource && i < sources.length) {
+      matchingSource = sources[i];
+      console.log(`[Screen Capture] Matched display ${display.id} by index ${i}`);
+    }
 
     if (matchingSource) {
       const thumbnail = matchingSource.thumbnail;
+      const capturedWidth = thumbnail.getSize().width;
+      const capturedHeight = thumbnail.getSize().height;
+      
       displayCaptures.push({
         displayId: display.id,
         dataUrl: thumbnail.toDataURL(),
-        width: thumbnail.getSize().width,
-        height: thumbnail.getSize().height,
+        width: capturedWidth,
+        height: capturedHeight,
         scaleFactor: display.scaleFactor,
         bounds: display.bounds,
       });
     } else {
-      console.warn(`[Screen Capture] Could not match source for display ${display.id} (expected ${expectedWidth}x${expectedHeight})`);
-      
-      // Try to match with increased tolerance
-      const relaxedMatch = sources.find(source => {
-        const widthMatch = Math.abs(source.thumbnail.getSize().width - expectedWidth) <= DIMENSION_TOLERANCE * 2;
-        const heightMatch = Math.abs(source.thumbnail.getSize().height - expectedHeight) <= DIMENSION_TOLERANCE * 2;
-        return widthMatch && heightMatch;
-      });
-      
-      if (relaxedMatch) {
-        console.log(`[Screen Capture] Matched display ${display.id} with relaxed tolerance`);
-        const thumbnail = relaxedMatch.thumbnail;
-        displayCaptures.push({
-          displayId: display.id,
-          dataUrl: thumbnail.toDataURL(),
-          width: thumbnail.getSize().width,
-          height: thumbnail.getSize().height,
-          scaleFactor: display.scaleFactor,
-          bounds: display.bounds,
-        });
-      }
+      console.warn(`[Screen Capture] Could not match source for display ${display.id}`);
     }
   }
 
