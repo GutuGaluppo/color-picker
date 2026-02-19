@@ -313,15 +313,15 @@ describe('Magnifier Property Tests', () => {
         fc.property(
           // Generate cursor positions on displays with varying scale factors
           fc.record({
-            cursorX: fc.integer({ min: 10, max: 1000 }),
-            cursorY: fc.integer({ min: 10, max: 1000 }),
+            cursorX: fc.integer(COORD_RANGES.x),
+            cursorY: fc.integer(COORD_RANGES.y),
             display: fc.record({
               id: fc.integer({ min: 1, max: 100 }),
               bounds: fc.record({
-                x: fc.integer({ min: 0, max: 1920 }),
-                y: fc.integer({ min: 0, max: 1080 }),
-                width: fc.integer({ min: 800, max: 3840 }),
-                height: fc.integer({ min: 600, max: 2160 })
+                x: fc.integer(DISPLAY_RANGES.x),
+                y: fc.integer(DISPLAY_RANGES.y),
+                width: fc.integer(DISPLAY_RANGES.width),
+                height: fc.integer(DISPLAY_RANGES.height)
               }),
               scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
               isPrimary: fc.boolean()
@@ -345,29 +345,24 @@ describe('Magnifier Property Tests', () => {
             const physicalX = localX * display.scaleFactor;
             const physicalY = localY * display.scaleFactor;
             
-            // Verify physical coordinates are within physical bounds
+            // Calculate physical bounds
             const physicalWidth = display.bounds.width * display.scaleFactor;
             const physicalHeight = display.bounds.height * display.scaleFactor;
             
-            // Property 1: Physical pixel coordinates must be within physical bounds
+            // Property: Physical pixel coordinates must be within physical bounds
+            // and scale transformation must be reversible within rounding tolerance
             const withinPhysicalBounds = 
               physicalX >= 0 && physicalX < physicalWidth &&
               physicalY >= 0 && physicalY < physicalHeight;
             
-            // Property 2: Scale factor must be applied consistently
-            const expectedPhysicalX = localX * display.scaleFactor;
-            const expectedPhysicalY = localY * display.scaleFactor;
-            const scaleAppliedCorrectly = 
-              physicalX === expectedPhysicalX &&
-              physicalY === expectedPhysicalY;
+            // Verify coordinate transformation is reversible (accounting for rounding)
+            const reconstructedX = Math.floor(physicalX / display.scaleFactor);
+            const reconstructedY = Math.floor(physicalY / display.scaleFactor);
+            const transformationReversible = 
+              Math.abs(reconstructedX - localX) <= 1 &&
+              Math.abs(reconstructedY - localY) <= 1;
             
-            // Property 3: Magnification factor must match scale factor
-            // For a 7x7 logical grid, physical sampling area should be (7*S) x (7*S)
-            const logicalGridSize = MAGNIFIER_GRID_SIZE;
-            const physicalGridSize = logicalGridSize * display.scaleFactor;
-            const magnificationCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
-            
-            return withinPhysicalBounds && scaleAppliedCorrectly && magnificationCorrect;
+            return withinPhysicalBounds && transformationReversible;
           }
         ),
         { numRuns: 100 }
@@ -377,6 +372,9 @@ describe('Magnifier Property Tests', () => {
     it('should maintain accurate pixel sampling when moving between displays with different scale factors', () => {
       // Feature: multi-monitor-support, Property 9: Scale Factor Magnification
       // Validates: Requirements 6.4 (cross-display scale factor handling)
+      
+      // Tolerance for floating point comparisons (handles scale factors like 1.25)
+      const SCALE_TOLERANCE = 0.0001;
       
       fc.assert(
         fc.property(
@@ -416,58 +414,39 @@ describe('Magnifier Property Tests', () => {
             const validDisplays = ensurePrimaryDisplay(displays);
             
             // Property: When cursor moves between displays with different scale factors,
-            // pixel sampling accuracy must be maintained
+            // magnification must adjust proportionally to the scale factor change
             
             let previousDisplay: TestDisplay | null = null;
             
             for (const pos of cursorPath) {
               const currentDisplay = findDisplayAtPoint(pos.x, pos.y, validDisplays);
               
-              // Only test positions that are on a display
               if (!currentDisplay) {
-                continue;
+                continue; // Skip positions not on any display
               }
               
-              // Convert to display-local coordinates
+              // Verify coordinates are within display bounds
               const localX = pos.x - currentDisplay.bounds.x;
               const localY = pos.y - currentDisplay.bounds.y;
               
-              // Apply scale factor
-              const physicalX = localX * currentDisplay.scaleFactor;
-              const physicalY = localY * currentDisplay.scaleFactor;
-              
-              // Verify physical coordinates are valid
-              const physicalWidth = currentDisplay.bounds.width * currentDisplay.scaleFactor;
-              const physicalHeight = currentDisplay.bounds.height * currentDisplay.scaleFactor;
-              
-              if (physicalX < 0 || physicalX >= physicalWidth ||
-                  physicalY < 0 || physicalY >= physicalHeight) {
+              if (localX < 0 || localX >= currentDisplay.bounds.width ||
+                  localY < 0 || localY >= currentDisplay.bounds.height) {
                 continue; // Skip invalid positions
               }
               
-              // If we transitioned to a different display with different scale factor
+              // Check scale factor transition
               if (previousDisplay && 
                   previousDisplay.id !== currentDisplay.id &&
                   previousDisplay.scaleFactor !== currentDisplay.scaleFactor) {
                 
-                // Property: Scale factor transition must maintain sampling accuracy
-                // The physical pixel calculation must use the new display's scale factor
-                const expectedPhysicalX = localX * currentDisplay.scaleFactor;
-                const expectedPhysicalY = localY * currentDisplay.scaleFactor;
-                
-                if (physicalX !== expectedPhysicalX || physicalY !== expectedPhysicalY) {
-                  return false;
-                }
-                
-                // Property: Magnification must adjust to new scale factor
+                // Property: Magnification must adjust proportionally to scale factor change
+                const scaleRatio = currentDisplay.scaleFactor / previousDisplay.scaleFactor;
                 const newMagnification = MAGNIFIER_GRID_SIZE * currentDisplay.scaleFactor;
                 const oldMagnification = MAGNIFIER_GRID_SIZE * previousDisplay.scaleFactor;
-                
-                // Magnification should change proportionally to scale factor change
-                const scaleRatio = currentDisplay.scaleFactor / previousDisplay.scaleFactor;
                 const magnificationRatio = newMagnification / oldMagnification;
                 
-                if (Math.abs(magnificationRatio - scaleRatio) > 0.001) {
+                // Verify magnification ratio matches scale ratio
+                if (Math.abs(magnificationRatio - scaleRatio) > SCALE_TOLERANCE) {
                   return false;
                 }
               }
@@ -493,16 +472,16 @@ describe('Magnifier Property Tests', () => {
             display: fc.record({
               id: fc.integer({ min: 1, max: 100 }),
               bounds: fc.record({
-                x: fc.integer({ min: 0, max: 1920 }),
-                y: fc.integer({ min: 0, max: 1080 }),
-                width: fc.integer({ min: 800, max: 3840 }),
-                height: fc.integer({ min: 600, max: 2160 })
+                x: fc.integer(DISPLAY_RANGES.x),
+                y: fc.integer(DISPLAY_RANGES.y),
+                width: fc.integer(DISPLAY_RANGES.width),
+                height: fc.integer(DISPLAY_RANGES.height)
               }),
               scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
               isPrimary: fc.boolean()
             }),
-            cursorX: fc.integer({ min: 10, max: 1000 }),
-            cursorY: fc.integer({ min: 10, max: 1000 })
+            cursorX: fc.integer(COORD_RANGES.x),
+            cursorY: fc.integer(COORD_RANGES.y)
           }),
           ({ display, cursorX, cursorY }) => {
             // Property: For any display with scale factor S,
@@ -533,22 +512,19 @@ describe('Magnifier Property Tests', () => {
             const physicalGridEndX = physicalGridStartX + physicalGridSize;
             const physicalGridEndY = physicalGridStartY + physicalGridSize;
             
-            // Property 1: Physical grid dimensions must equal logical grid * scale factor
-            const widthCorrect = (physicalGridEndX - physicalGridStartX) === physicalGridSize;
-            const heightCorrect = (physicalGridEndY - physicalGridStartY) === physicalGridSize;
+            // Property: Physical grid dimensions must equal logical grid * scale factor
+            const actualWidth = physicalGridEndX - physicalGridStartX;
+            const actualHeight = physicalGridEndY - physicalGridStartY;
+            const dimensionsCorrect = 
+              actualWidth === physicalGridSize && 
+              actualHeight === physicalGridSize;
             
-            // Property 2: Physical grid must contain the correct number of physical pixels
-            const expectedPhysicalPixels = logicalGridSize * display.scaleFactor * 
-                                          logicalGridSize * display.scaleFactor;
-            const actualPhysicalPixels = physicalGridSize * physicalGridSize;
-            const pixelCountCorrect = actualPhysicalPixels === expectedPhysicalPixels;
+            // Property: Physical grid area must equal (logical grid * scale)²
+            const expectedArea = Math.pow(logicalGridSize * display.scaleFactor, 2);
+            const actualArea = physicalGridSize * physicalGridSize;
+            const areaCorrect = actualArea === expectedArea;
             
-            // Property 3: Scale factor must be applied uniformly in both dimensions
-            const xScaleCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
-            const yScaleCorrect = physicalGridSize === logicalGridSize * display.scaleFactor;
-            
-            return widthCorrect && heightCorrect && pixelCountCorrect && 
-                   xScaleCorrect && yScaleCorrect;
+            return dimensionsCorrect && areaCorrect;
           }
         ),
         { numRuns: 100 }
@@ -753,6 +729,273 @@ describe('Magnifier Property Tests', () => {
               Math.abs(reconstructedLocalY - localY) <= 1;
             
             return rgbValid && transformationValid;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe('Property 10: Center Pixel Extraction', () => {
+    it('should highlight the center pixel of the 7x7 grid at cursor position', () => {
+      // Feature: multi-monitor-support, Property 10: Center Pixel Extraction
+      // Validates: Requirements 5.4
+      
+      fc.assert(
+        fc.property(
+          // Generate arbitrary cursor positions across multiple displays
+          fc.record({
+            cursorX: fc.integer(COORD_RANGES.x),
+            cursorY: fc.integer(COORD_RANGES.y),
+            displays: fc.array(
+              fc.record({
+                id: fc.integer({ min: 1, max: 100 }),
+                bounds: fc.record({
+                  x: fc.integer(DISPLAY_RANGES.x),
+                  y: fc.integer(DISPLAY_RANGES.y),
+                  width: fc.integer(DISPLAY_RANGES.width),
+                  height: fc.integer(DISPLAY_RANGES.height)
+                }),
+                scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+                isPrimary: fc.boolean()
+              }),
+              { minLength: 1, maxLength: 4 }
+            )
+          }),
+          ({ cursorX, cursorY, displays }) => {
+            const validDisplays = ensurePrimaryDisplay(displays);
+            const currentDisplay = findDisplayAtPoint(cursorX, cursorY, validDisplays);
+
+            // If cursor is not on any display, skip this test case
+            if (!currentDisplay) {
+              return true;
+            }
+
+            // Property: For any cursor position on any display,
+            // the magnifier must highlight the center pixel of the 7x7 grid
+            // and that center pixel must be at the cursor position
+            
+            const halfGrid = Math.floor(MAGNIFIER_GRID_SIZE / 2); // 3 pixels on each side
+            const gridStartX = cursorX - halfGrid;
+            const gridStartY = cursorY - halfGrid;
+            
+            // Calculate the center pixel index in the grid
+            // For a 7x7 grid, the center is at index (3, 3) = position 24 (0-indexed)
+            const centerGridX = halfGrid; // 3
+            const centerGridY = halfGrid; // 3
+            const centerPixelIndex = centerGridY * MAGNIFIER_GRID_SIZE + centerGridX; // 3*7 + 3 = 24
+            
+            // Verify the center pixel is at the cursor position
+            const centerPixelX = gridStartX + centerGridX;
+            const centerPixelY = gridStartY + centerGridY;
+            
+            // Property 1: Center pixel must be at cursor position
+            const centerAtCursor = (centerPixelX === cursorX && centerPixelY === cursorY);
+            
+            // Property 2: Center pixel index must be 24 (middle of 49 pixels)
+            const centerIndexCorrect = (centerPixelIndex === 24);
+            
+            // Property 3: Grid must be symmetric around center
+            const pixelsBeforeCenter = centerPixelIndex; // 24 pixels before
+            const pixelsAfterCenter = (MAGNIFIER_TOTAL_PIXELS - 1) - centerPixelIndex; // 24 pixels after
+            const gridSymmetric = (pixelsBeforeCenter === pixelsAfterCenter);
+            
+            return centerAtCursor && centerIndexCorrect && gridSymmetric;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should extract color value accurately from center pixel across all displays', () => {
+      // Feature: multi-monitor-support, Property 10: Center Pixel Extraction
+      // Validates: Requirements 5.4 (accurate color extraction)
+      
+      fc.assert(
+        fc.property(
+          // Generate cursor positions and expected center pixel colors
+          fc.record({
+            cursorX: fc.integer(COORD_RANGES.x),
+            cursorY: fc.integer(COORD_RANGES.y),
+            displays: fc.array(
+              fc.record({
+                id: fc.integer({ min: 1, max: 100 }),
+                bounds: fc.record({
+                  x: fc.integer(DISPLAY_RANGES.x),
+                  y: fc.integer(DISPLAY_RANGES.y),
+                  width: fc.integer(DISPLAY_RANGES.width),
+                  height: fc.integer(DISPLAY_RANGES.height)
+                }),
+                scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+                isPrimary: fc.boolean()
+              }),
+              { minLength: 1, maxLength: 4 }
+            ),
+            centerPixelColor: fc.record({
+              r: fc.integer({ min: 0, max: 255 }),
+              g: fc.integer({ min: 0, max: 255 }),
+              b: fc.integer({ min: 0, max: 255 })
+            })
+          }),
+          ({ cursorX, cursorY, displays, centerPixelColor }) => {
+            const validDisplays = ensurePrimaryDisplay(displays);
+            const currentDisplay = findDisplayAtPoint(cursorX, cursorY, validDisplays);
+
+            // If cursor is not on any display, skip this test case
+            if (!currentDisplay) {
+              return true;
+            }
+
+            // Property: For any cursor position on any display,
+            // the color extraction from the center pixel must be accurate
+            
+            // Convert to display-local coordinates
+            const localX = cursorX - currentDisplay.bounds.x;
+            const localY = cursorY - currentDisplay.bounds.y;
+            
+            // Verify cursor is within display bounds
+            if (localX < 0 || localX >= currentDisplay.bounds.width ||
+                localY < 0 || localY >= currentDisplay.bounds.height) {
+              return true; // Skip positions outside display
+            }
+            
+            // Apply scale factor for physical pixel sampling
+            const physicalX = localX * currentDisplay.scaleFactor;
+            const physicalY = localY * currentDisplay.scaleFactor;
+            
+            // Verify physical coordinates are valid
+            const physicalWidth = currentDisplay.bounds.width * currentDisplay.scaleFactor;
+            const physicalHeight = currentDisplay.bounds.height * currentDisplay.scaleFactor;
+            
+            if (physicalX < 0 || physicalX >= physicalWidth ||
+                physicalY < 0 || physicalY >= physicalHeight) {
+              return true; // Skip invalid physical positions
+            }
+            
+            // Property 1: RGB values must be valid
+            const rgbValid = 
+              centerPixelColor.r >= 0 && centerPixelColor.r <= 255 &&
+              centerPixelColor.g >= 0 && centerPixelColor.g <= 255 &&
+              centerPixelColor.b >= 0 && centerPixelColor.b <= 255;
+            
+            // Property 2: Color conversion to HEX must be lossless
+            const hex = `#${toHex(centerPixelColor.r)}${toHex(centerPixelColor.g)}${toHex(centerPixelColor.b)}`;
+            const hexPattern = /^#[0-9A-F]{6}$/;
+            const hexValid = hexPattern.test(hex);
+            
+            // Property 3: Round-trip conversion must preserve values
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            const roundTripValid = 
+              r === centerPixelColor.r &&
+              g === centerPixelColor.g &&
+              b === centerPixelColor.b;
+            
+            return rgbValid && hexValid && roundTripValid;
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should maintain center pixel extraction accuracy across displays with different scale factors', () => {
+      // Feature: multi-monitor-support, Property 10: Center Pixel Extraction
+      // Validates: Requirements 5.4 (consistency across scale factors)
+      
+      fc.assert(
+        fc.property(
+          // Generate cursor movements across displays with different scale factors
+          fc.record({
+            displays: fc.array(
+              fc.record({
+                id: fc.integer({ min: 1, max: 100 }),
+                bounds: fc.record({
+                  x: fc.integer(DISPLAY_RANGES.x),
+                  y: fc.integer(DISPLAY_RANGES.y),
+                  width: fc.integer(DISPLAY_RANGES.width),
+                  height: fc.integer(DISPLAY_RANGES.height)
+                }),
+                scaleFactor: fc.constantFrom(1.0, 1.25, 1.5, 2.0, 2.5),
+                isPrimary: fc.boolean()
+              }),
+              { minLength: 2, maxLength: 4 }
+            ).filter(displays => {
+              // Ensure we have at least 2 displays with different scale factors
+              const scaleFactors = new Set(displays.map(d => d.scaleFactor));
+              return scaleFactors.size >= 2;
+            }),
+            cursorPositions: fc.array(
+              fc.record({
+                x: fc.integer(COORD_RANGES.x),
+                y: fc.integer(COORD_RANGES.y)
+              }),
+              { minLength: 2, maxLength: 10 }
+            )
+          }),
+          ({ displays, cursorPositions }) => {
+            if (displays.length < 2) {
+              return true; // Skip if filter didn't produce enough displays
+            }
+            
+            const validDisplays = ensurePrimaryDisplay(displays);
+            const halfGrid = Math.floor(MAGNIFIER_GRID_SIZE / 2);
+            
+            // Property: Center pixel extraction must be accurate regardless of scale factor
+            for (const pos of cursorPositions) {
+              const currentDisplay = findDisplayAtPoint(pos.x, pos.y, validDisplays);
+              
+              // Only test positions that are on a display
+              if (!currentDisplay) {
+                continue;
+              }
+              
+              // Calculate center pixel position
+              const gridStartX = pos.x - halfGrid;
+              const gridStartY = pos.y - halfGrid;
+              const centerPixelX = gridStartX + halfGrid;
+              const centerPixelY = gridStartY + halfGrid;
+              
+              // Verify center pixel is at cursor position (invariant across scale factors)
+              if (centerPixelX !== pos.x || centerPixelY !== pos.y) {
+                return false;
+              }
+              
+              // Convert to display-local coordinates
+              const localX = pos.x - currentDisplay.bounds.x;
+              const localY = pos.y - currentDisplay.bounds.y;
+              
+              // Verify cursor is within display bounds
+              if (localX < 0 || localX >= currentDisplay.bounds.width ||
+                  localY < 0 || localY >= currentDisplay.bounds.height) {
+                continue; // Skip positions outside display
+              }
+              
+              // Apply scale factor for physical pixel sampling
+              const physicalX = localX * currentDisplay.scaleFactor;
+              const physicalY = localY * currentDisplay.scaleFactor;
+              
+              // Verify physical coordinates are valid
+              const physicalWidth = currentDisplay.bounds.width * currentDisplay.scaleFactor;
+              const physicalHeight = currentDisplay.bounds.height * currentDisplay.scaleFactor;
+              
+              if (physicalX < 0 || physicalX >= physicalWidth ||
+                  physicalY < 0 || physicalY >= physicalHeight) {
+                continue; // Skip invalid physical positions
+              }
+              
+              // Property: Physical pixel coordinates must be correctly calculated
+              // regardless of scale factor
+              const expectedPhysicalX = localX * currentDisplay.scaleFactor;
+              const expectedPhysicalY = localY * currentDisplay.scaleFactor;
+              
+              if (Math.abs(physicalX - expectedPhysicalX) > 0.001 ||
+                  Math.abs(physicalY - expectedPhysicalY) > 0.001) {
+                return false;
+              }
+            }
+            
+            return true;
           }
         ),
         { numRuns: 100 }

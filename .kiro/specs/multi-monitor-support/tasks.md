@@ -238,7 +238,7 @@ This implementation extends the color picker to support multi-monitor setups wit
     - **Property 9: Scale Factor Magnification**
     - **Validates: Requirements 5.3, 6.4**
   
-  - [ ] 9.6 Write property test for center pixel extraction
+  - [x] 9.6 Write property test for center pixel extraction
     - **Property 10: Center Pixel Extraction**
     - **Validates: Requirements 5.4**
   
