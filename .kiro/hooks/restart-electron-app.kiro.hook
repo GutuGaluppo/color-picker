@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Restart Electron App",
+  "description": "Manually restart the Electron development server",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Stop the current Electron dev server (terminal ID 10) and start a new one with npm run electron:dev"
+  }
+}

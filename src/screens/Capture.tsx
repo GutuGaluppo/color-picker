@@ -82,14 +82,12 @@ export const Capture: React.FC = () => {
         clearTimeout(feedbackTimeoutRef.current);
       }
 
-      // Hide feedback and close after 150ms
+      // Hide feedback after 1 second, but keep capture active
       feedbackTimeoutRef.current = setTimeout(() => {
         setShowFeedback(false);
-        window.electronAPI.closeCapture();
-      }, 2000);
+      }, 1000);
     } catch (error) {
       console.error("Failed to copy color:", error);
-      window.electronAPI.closeCapture();
     }
   }, [currentColor, currentDisplay]);
 
@@ -118,8 +116,6 @@ export const Capture: React.FC = () => {
         backgroundColor: "transparent",
         cursor: "crosshair",
       }}
-      // className="w-screen h-screen relative pipette-cursor"
-      // style={{ backgroundColor: "transparent" }}
     >
       {currentDisplay && (
         <Magnifier

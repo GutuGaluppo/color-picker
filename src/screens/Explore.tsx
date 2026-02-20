@@ -94,7 +94,7 @@ export const Explore: React.FC = () => {
                 COLOR PICKER
               </div>
               <h1 className="text-3xl font-bold text-command-accent tracking-tight">
-                COMMAND
+                SPECTRA
               </h1>
             </div>
             <div className="flex flex-col items-end gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
