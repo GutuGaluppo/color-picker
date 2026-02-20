@@ -39,6 +39,7 @@
 │  │  │    captureScreen: () => ipcRenderer.invoke(...)   │  │    │
 │  │  │    copyToClipboard: (text) => ipcRenderer.invoke  │  │    │
 │  │  │    closeCapture: () => ipcRenderer.send(...)      │  │    │
+│  │  │    quitApp: () => ipcRenderer.send(...)           │  │    │
 │  │  │    ...                                             │  │    │
 │  │  │  })                                                │  │    │
 │  │  └──────────────────────────────────────────────────┘  │    │
@@ -105,9 +106,19 @@ User clicks tray → Show Window
     ↓
 Explore window becomes visible
 
-User clicks tray → Quit
+User clicks tray → Quit OR clicks quit button (×) in Explore window
+    ↓
+IPC 'quit-app' sent to main process (if from Explore window)
+    ↓
+app.isQuitting flag set to true
+    ↓
+app.quit() called
+    ↓
+'before-quit' event fires
     ↓
 Cleanup: destroy tray, unregister shortcuts
+    ↓
+Window close events allowed to proceed
     ↓
 App terminates
 ```
@@ -261,7 +272,10 @@ App
 ### Renderer State (Explore)
 ```typescript
 {
-  colorHistory: ColorHistoryItem[] // Loaded from main process via IPC
+  history: ColorHistoryItem[],
+  copyFeedback: string | null,
+  isHistoryExpanded: boolean,
+  colorFormat: ColorFormat  // 'rgb' | 'hex' | 'hsl'
 }
 ```
 
@@ -307,6 +321,13 @@ App
   - `globalShortcut` - Keyboard hooks
   - `BrowserWindow` - Window management
   - `ipcMain` - IPC server
+    - `quit-app` - Quit application from renderer
+    - `start-capture` - Begin color picking
+    - `cancel-capture` - Exit capture mode
+    - `add-color-to-history` - Store captured color
+    - `get-color-history` - Retrieve color history
+    - `copy-to-clipboard` - Copy text to clipboard
+    - `capture-screen` - Capture all displays
 
 ### React (Renderer Process)
 - **Version**: ^18.2.0
@@ -324,8 +345,8 @@ App
   - React JSX
 
 ### Build Tools
-- **Vite**: Dev server + HMR
-- **vite-plugin-electron**: Electron integration
+- **Vite**: Dev server + HMR (port 5173), renderer bundling only
+- **TypeScript Compiler**: Main and preload process compilation
 - **electron-builder**: Distribution
 
 ## File Size Breakdown
@@ -583,6 +604,10 @@ A comprehensive multi-monitor feature with complete design specification. Displa
     - Glassmorphism styling applied
     - Scrollable container for history list
     - Empty state display when no history
+    - Color format selection (RGB/HEX/HSL) with format buttons
+    - Memoized formatted history for performance
+    - Quit button in top-right corner
+    - Improved accessibility with ARIA labels
   - ✅ 10.2: Property test for history click-to-copy (complete)
     - Property 21: History Click-to-Copy validated
   - ✅ 10.3: Unit tests complete
