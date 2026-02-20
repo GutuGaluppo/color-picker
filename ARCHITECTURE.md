@@ -227,10 +227,12 @@ Explore window receives focus with updated history
 ```
 App
  ├─ Explore (Route: #/explore)
+ │   ├─ useColorHistory hook (manages history state and IPC)
  │   └─ Glass container
  │       ├─ Quit button (×)
- │       ├─ Header (SPECTRA title)
- │       ├─ Format selector (RGB/HEX/HSL)
+ │       ├─ Header (src/screens/Explore/Header/)
+ │       │   ├─ SPECTRA title
+ │       │   └─ Format selector (RGB/HEX/HSL)
  │       └─ Color History list (collapsible)
  │           └─ History items (clickable)
  │               ├─ Drag handle (::)
@@ -339,6 +341,8 @@ App
   - `useEffect` - Side effects
   - `useCallback` - Memoized functions
   - `useRef` - DOM/timeout refs
+- **Custom Hooks**:
+  - `useColorHistory` - Color history state management with IPC communication
 
 ### TypeScript
 - **Version**: ^5.3.3

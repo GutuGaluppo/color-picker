@@ -108,6 +108,8 @@ color-picker/
 │   │   └── Capture.tsx    # Color picker
 │   ├── components/
 │   │   └── Magnifier.tsx  # Canvas magnifier
+│   ├── hooks/
+│   │   └── useColorHistory.ts  # Color history state hook
 │   ├── shared/
 │   │   └── color.ts       # Color utilities
 │   └── styles/
