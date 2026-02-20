@@ -22,21 +22,26 @@ npm run build          # Compile TypeScript + bundle + copy assets
 npm run electron:build # Create distributable packages
 ```
 
+### Build Process
+The build uses separate compilation paths:
+- Renderer (React): Vite bundles to `dist/`
+- Main/Preload: TypeScript compiler outputs to `dist-electron/`
+- Assets: Copied from `electron/assets/` to `dist-electron/assets/`
+
 ### Asset Pipeline
 The build process includes an asset copy step that moves icon files from `electron/assets/` to `dist-electron/assets/`.
 
 ## TypeScript Configuration
 
 Three separate tsconfig files:
-- `tsconfig.json` - Renderer process (React)
-- `tsconfig.electron.json` - Main process (Electron)
+- `tsconfig.json` - Renderer process (React), noEmit mode
+- `tsconfig.electron.json` - Main process (Electron), outputs to dist-electron
 - `tsconfig.node.json` - Build scripts
 
 All use strict mode with ES2020 target.
 
 ## Key Libraries
 
-- vite-plugin-electron - Electron integration with Vite
 - electron-builder - Application packaging
 - Canvas API - Magnifier rendering (no external canvas library)
 
