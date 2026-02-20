@@ -229,7 +229,7 @@ App
  ├─ Explore (Route: #/explore)
  │   ├─ useColorHistory hook (manages history state and IPC)
  │   └─ Glass container
- │       ├─ Quit button (×)
+ │       ├─ CloseButton (×) - Quit app button
  │       ├─ Header (src/screens/Explore/Header/)
  │       │   ├─ SPECTRA title
  │       │   └─ Format selector (RGB/HEX/HSL)
@@ -237,7 +237,8 @@ App
  │           └─ History items (clickable)
  │               ├─ Drag handle (::)
  │               ├─ Color swatch
- │               ├─ Rain drop icon (colored)
+ │               ├─ RainIcon (colored)
+ │               ├─ PantoneIcon
  │               └─ Formatted color value
  │
  └─ Capture (Route: #/capture)
@@ -250,6 +251,20 @@ App
      └─ Feedback toast
          └─ "✓ Copied #HEX"
 ```
+
+### UI Components
+
+Located in `src/components/ui/`:
+
+- **CloseButton** - Quit button with hover effects, triggers `window.electronAPI.quitApp()`
+- **RainIcon** - SVG rain drop icon for color history items
+- **NatureIcon** - SVG nature-themed icon
+- **PantoneIcon** - Configurable icon component with multiple variants:
+  - `default` - Standard Pantone icon
+  - `circle` - Circular Pantone variant
+  - `color-picker` - Color picker themed icon
+  - `pantone-1` - Alternative Pantone design
+  - Accepts `size` and `className` props for customization
 
 ## State Management
 

@@ -2,6 +2,7 @@ import React from "react";
 import { type ColorFormat } from "../../../shared/color";
 import { useFormattedHistory } from "../../../hooks";
 import RainIcon from "../../../components/ui/RainIcon";
+import PantoneIcon from "../../../components/ui/PantoneIcon";
 
 const HISTORY_MIN_HEIGHT = 150;
 const HISTORY_MAX_HEIGHT = 180;
@@ -76,6 +77,7 @@ const ColorHistory: React.FC<ColorHistoryProps> = ({
                       size={24}
                       className="flex-shrink-0"
                     />
+                    <PantoneIcon/>
                     <div className="flex-1 text-left">
                       <div className="text-xs font-bold text-command-text tracking-wide">
                         {item.formatted}

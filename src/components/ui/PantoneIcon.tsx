@@ -1,7 +1,7 @@
 import React from "react";
 
 interface PantoneIconProps {
-  variant?: "default" | "circle" | "color-picker" | "pantone-1";
+  variant?: "default" | "circle" | "colored";
   size?: number;
   className?: string;
 }
@@ -14,13 +14,11 @@ const PantoneIcon: React.FC<PantoneIconProps> = ({
   const getIconPath = () => {
     switch (variant) {
       case "circle":
-        return "/src/components/ui/compressed/pantone circle.svg";
-      case "color-picker":
-        return "/src/components/ui/compressed/color-picker.svg";
-      case "pantone-1":
-        return "/src/components/ui/compressed/pantone (1).svg";
+        return "/src/components/ui/compressed/pantone-circle.svg";
+      case "colored":
+        return "/src/components/ui/compressed/pantone-colored.svg";
       default:
-        return "/src/components/ui/compressed/pantone.svg";
+        return "/src/components/ui/compressed/color-picker.svg";
     }
   };
 
