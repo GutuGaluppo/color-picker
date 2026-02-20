@@ -436,6 +436,47 @@ Total App Size:      ~200 MB (typical)
 
 ### Planned Enhancements
 
+### Color Wheel Drawer (Design Complete)
+An interactive color wheel component accessible via a slide-out drawer on the Explore screen, providing visual color selection alongside pixel-based capture.
+
+**Key Features:**
+- Slide-out drawer from right edge of Explore screen
+- Clickable tab to toggle drawer open/closed
+- Interactive circular color wheel component using Canvas API
+- Glassmorphism design matching app aesthetic
+- State persistence during session
+- Non-intrusive overlay approach
+
+**Architecture:**
+- Three new components: DrawerTab, Drawer, ColorWheel
+- Local state management using React useState
+- Canvas-based color wheel with HSL color space
+- CSS transforms for smooth slide animations
+- Integrates with existing color history workflow
+
+**Components:**
+- **DrawerTab** (`src/screens/Explore/DrawerTab/`) - Vertical tab with toggle functionality
+- **Drawer** (`src/screens/Explore/Drawer/`) - 320px slide-out container with glassmorphism
+- **ColorWheel** (`src/screens/Explore/ColorWheel/`) - 240px canvas-based interactive color picker
+
+**Color Wheel Implementation:**
+- HTML5 Canvas API (consistent with Magnifier approach)
+- HSL color space for smooth gradients
+- Click/drag interaction for color selection
+- Cursor indicator with visual feedback
+- HSL to HEX conversion using existing color utilities
+
+**Requirements:**
+- 7 requirements covering drawer visibility, interaction, layout, color wheel display, design consistency, state persistence, and responsive behavior
+- Complete acceptance criteria for each requirement
+- Specification: `.kiro/specs/color-wheel-drawer/requirements.md`
+- Design: `.kiro/specs/color-wheel-drawer/design.md`
+
+**Implementation Status:**
+- Requirements document complete
+- Design document complete
+- Implementation tasks pending
+
 ### Multi-Monitor Support (In Progress - Task 5 Complete)
 A comprehensive multi-monitor feature with complete design specification. Display Manager, Screen Capture, and Window Manager modules are now implemented.
 

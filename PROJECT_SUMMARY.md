@@ -366,6 +366,34 @@ TypeScript → Compile → Vite Bundle → Electron Package
 
 ## 📈 Planned Enhancements
 
+### Color Wheel Drawer (Design Complete)
+An interactive color wheel component for visual color selection:
+
+**Features:**
+- Slide-out drawer from right edge of Explore screen
+- Clickable tab to toggle drawer visibility
+- Interactive circular color wheel using Canvas API
+- Glassmorphism design consistent with app aesthetic
+- Session-based state persistence
+- Non-intrusive overlay approach
+
+**Architecture:**
+- Three new components: DrawerTab, Drawer, ColorWheel
+- Local state management using React useState
+- Canvas-based color wheel with HSL color space
+- CSS transforms for smooth slide animations (0.3s ease-in-out)
+- Integrates with existing color history workflow
+
+**Components:**
+- **DrawerTab** - 120px × 32px vertical tab with "COLOR WHEEL" text
+- **Drawer** - 320px wide container with glassmorphism effect
+- **ColorWheel** - 240px canvas with HSL gradient and click/drag interaction
+
+**Specification:**
+- Requirements: `.kiro/specs/color-wheel-drawer/requirements.md` (7 requirements)
+- Design: `.kiro/specs/color-wheel-drawer/design.md` (complete architecture)
+- Status: Requirements and design complete, implementation pending
+
 ### Multi-Monitor Support (Implementation Ready)
 A comprehensive multi-monitor feature with complete design specification and implementation plan:
 
