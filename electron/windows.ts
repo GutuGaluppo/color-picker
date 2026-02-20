@@ -33,9 +33,17 @@ export function createExploreWindow(): BrowserWindow {
     return exploreWindow;
   }
 
+  // Get primary display to center the window
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+  const windowWidth = 400;
+  const windowHeight = 400;
+
   exploreWindow = new BrowserWindow({
-    width: 400,
-    height: 400,
+    width: windowWidth,
+    height: windowHeight,
+    x: Math.floor((screenWidth - windowWidth) / 2),
+    y: Math.floor((screenHeight - windowHeight) / 2),
     resizable: false,
     frame: false,
     transparent: true,
@@ -47,6 +55,9 @@ export function createExploreWindow(): BrowserWindow {
       nodeIntegration: false,
     },
   });
+
+  // Set window level to floating to ensure it stays above capture window
+  exploreWindow.setAlwaysOnTop(true, 'floating');
 
   if (VITE_DEV_SERVER_URL) {
     exploreWindow.loadURL(`${VITE_DEV_SERVER_URL}#/explore`);
@@ -103,6 +114,7 @@ export function createCaptureWindow(): BrowserWindow {
 
   captureWindow.setIgnoreMouseEvents(false);
   captureWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); // ADD this
+  captureWindow.setAlwaysOnTop(true, 'screen-saver'); // Lower level than explore window
 
   if (VITE_DEV_SERVER_URL) {
     captureWindow.loadURL(`${VITE_DEV_SERVER_URL}#/capture`);

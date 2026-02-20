@@ -344,6 +344,8 @@ Total App Size:      ~200 MB (typical)
 {
   width: 400,
   height: 400,  // Increased to accommodate color history list
+  x: Math.floor((screenWidth - 400) / 2),   // Centered on primary display
+  y: Math.floor((screenHeight - 400) / 2),  // Centered on primary display
   resizable: false,
   frame: false,
   transparent: true,
@@ -368,6 +370,12 @@ Total App Size:      ~200 MB (typical)
   visibleOnAllWorkspaces: true
 }
 ```
+
+**Transparency Implementation:**
+- Both windows use `transparent: true` in Electron configuration
+- Body element has `background: transparent` in CSS (src/index.css)
+- Glassmorphism effects applied via component-level styling
+- Enables frameless design with see-through backgrounds
 
 **Note**: Multi-monitor support is in active development. Display Manager and Screen Capture modules are complete. Window Manager has been enhanced with color history and virtual screen spanning. See `.kiro/specs/multi-monitor-support/` for complete specification and progress.
 
@@ -405,6 +413,7 @@ A comprehensive multi-monitor feature with complete design specification. Displa
   - 100ms capture caching for performance
   - Cache invalidation on display changes
   - Error handling with fallback to primary display
+  - Debug logging for display detection and source matching diagnostics
   - Comprehensive unit tests (570 lines)
   - Property-based tests for native resolution capture (Property 2) and scale factor adjustment (Property 12)
 

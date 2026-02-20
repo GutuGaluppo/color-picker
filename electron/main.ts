@@ -1,7 +1,7 @@
 import { app, ipcMain, BrowserWindow } from 'electron';
-import { 
-  createExploreWindow, 
-  createCaptureWindow, 
+import {
+  createExploreWindow,
+  createCaptureWindow,
   closeCaptureWindow,
   hideExploreWindow,
   showExploreWindow,
@@ -43,6 +43,8 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
+    console.log('[Main] App ready, initializing...');
+    
     // Initialize display change listeners to invalidate capture cache
     initializeDisplayListeners((displays: DisplayInfo[]) => {
       console.log('[Main] Display configuration changed:', displays.length, 'displays');
@@ -69,7 +71,9 @@ if (!gotTheLock) {
 
     // Try to create system tray, fallback to showing window if it fails
     try {
+      console.log('[Main] Creating system tray...');
       createTray();
+      console.log('[Main] System tray created successfully');
     } catch (error) {
       console.error('Failed to create system tray:', error);
       console.warn('Continuing without system tray - limited functionality');
@@ -77,10 +81,14 @@ if (!gotTheLock) {
       // This ensures the app is still accessible even without tray support
     }
     
+    console.log('[Main] Registering global shortcuts...');
     registerGlobalShortcuts();
+    console.log('[Main] Creating explore window...');
     createExploreWindow();
+    console.log('[Main] Initialization complete');
 
     app.on('activate', () => {
+      console.log('[Main] App activated');
       createExploreWindow();
     });
   });
@@ -136,7 +144,7 @@ ipcMain.on('close-capture', () => {
 });
 
 ipcMain.on('start-capture', () => {
-  hideExploreWindow();
+  // Don't hide explore window - it should remain visible as a floating control panel
   createCaptureWindow();
 });
 

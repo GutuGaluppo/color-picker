@@ -109,6 +109,15 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
   // This is more reliable than dimension matching which can fail due to scaling issues
   const displayCaptures: DisplayCapture[] = [];
 
+  console.log('[Screen Capture] Displays detected:', displays.length);
+  console.log('[Screen Capture] Sources available:', sources.length);
+  displays.forEach((d, i) => {
+    console.log(`[Screen Capture] Display ${i}: id=${d.id}, bounds=${JSON.stringify(d.bounds)}, scaleFactor=${d.scaleFactor}, isPrimary=${d.isPrimary}`);
+  });
+  sources.forEach((s, i) => {
+    console.log(`[Screen Capture] Source ${i}: name="${s.name}", size=${s.thumbnail.getSize().width}x${s.thumbnail.getSize().height}`);
+  });
+
   for (let i = 0; i < displays.length; i++) {
     const display = displays[i];
     
