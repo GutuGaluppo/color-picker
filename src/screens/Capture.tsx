@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Magnifier } from "../components/Magnifier";
 import "../styles/glass.css";
 
+const FEEDBACK_DURATION = 1000;
+
 /**
  * Helper function to find which display contains a given point
  */
@@ -31,7 +33,7 @@ export const Capture: React.FC = () => {
   const [currentDisplay, setCurrentDisplay] = useState<DisplayCapture | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [copiedColor, setCopiedColor] = useState("");
-  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const loadScreenCapture = async () => {
@@ -82,10 +84,10 @@ export const Capture: React.FC = () => {
         clearTimeout(feedbackTimeoutRef.current);
       }
 
-      // Hide feedback after 1 second, but keep capture active
+      // Hide feedback after duration, but keep capture active
       feedbackTimeoutRef.current = setTimeout(() => {
         setShowFeedback(false);
-      }, 1000);
+      }, FEEDBACK_DURATION);
     } catch (error) {
       console.error("Failed to copy color:", error);
     }
@@ -127,7 +129,11 @@ export const Capture: React.FC = () => {
       )}
 
       {showFeedback && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <div 
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          role="status"
+          aria-live="polite"
+        >
           <div className="glass-dark px-6 py-3">
             <div className="text-white text-lg font-semibold">
               ✓ Copied {copiedColor}
