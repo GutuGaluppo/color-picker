@@ -51,6 +51,7 @@ export interface ElectronAPI {
   startCapture: () => void;
   closeExplore: () => void;
   cancelCapture: () => void;
+  quitApp: () => void;
   addColorToHistory: (hex: string) => Promise<void>;
   getColorHistory: () => Promise<ColorHistoryItem[]>;
   onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
@@ -64,6 +65,7 @@ const electronAPI: ElectronAPI = {
   startCapture: () => ipcRenderer.send('start-capture'),
   closeExplore: () => ipcRenderer.send('close-explore'),
   cancelCapture: () => ipcRenderer.send('cancel-capture'),
+  quitApp: () => ipcRenderer.send('quit-app'),
   addColorToHistory: (hex: string) => ipcRenderer.invoke('add-color-to-history', hex),
   getColorHistory: () => ipcRenderer.invoke('get-color-history'),
   onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => {

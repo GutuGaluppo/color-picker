@@ -1,6 +1,7 @@
-import { BrowserWindow, screen } from "electron";
+import { BrowserWindow, screen, app } from "electron";
 import path from "path";
 import { getVirtualScreenBounds } from "./displays";
+import { isQuitting } from "./main";
 
 export interface ColorHistoryItem {
   hex: string;
@@ -67,11 +68,13 @@ export function createExploreWindow(): BrowserWindow {
     });
   }
 
-  // Handle window close event - hide instead of destroying
+  // Handle window close event - hide instead of destroying (unless app is quitting)
   exploreWindow.on("close", (event) => {
-    event.preventDefault();
-    exploreWindow?.hide();
-    windowState.exploreVisible = false;
+    if (!isQuitting()) {
+      event.preventDefault();
+      exploreWindow?.hide();
+      windowState.exploreVisible = false;
+    }
   });
 
   exploreWindow.on("closed", () => {

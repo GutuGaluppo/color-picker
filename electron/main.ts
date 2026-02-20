@@ -21,6 +21,13 @@ import { initializeDisplayListeners, cleanupDisplayListeners, DisplayInfo } from
 const MEMORY_CHECK_INTERVAL_MS = 30000;
 let memoryCheckTimer: NodeJS.Timeout | null = null;
 
+// Flag to track if app is quitting
+let isAppQuitting = false;
+
+export function isQuitting(): boolean {
+  return isAppQuitting;
+}
+
 // Request single instance lock to prevent duplicate launches
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -111,6 +118,7 @@ app.on('will-quit', () => {
 });
 
 app.on('before-quit', () => {
+  isAppQuitting = true;
   destroyTray();
 });
 
@@ -156,6 +164,11 @@ ipcMain.on('close-explore', () => {
 ipcMain.on('cancel-capture', () => {
   closeCaptureWindow();
   restoreExploreWindowState();
+});
+
+ipcMain.on('quit-app', () => {
+  isAppQuitting = true;
+  app.quit();
 });
 
 ipcMain.handle('add-color-to-history', async (_event, hex: string) => {
