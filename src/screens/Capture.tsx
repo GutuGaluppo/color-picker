@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Magnifier } from "../components/Magnifier";
+import ColorPickerIcon from "../components/ui/ColorPickerIcon";
 import "../styles/glass.css";
 
 const FEEDBACK_DURATION = 1000;
@@ -116,9 +117,21 @@ export const Capture: React.FC = () => {
       className="w-screen h-screen relative"
       style={{
         backgroundColor: "transparent",
-        cursor: "crosshair",
+        cursor: "none",
       }}
     >
+      {/* Custom cursor */}
+      <div
+        className="fixed pointer-events-none z-50"
+        style={{
+          left: mousePos.x,
+          top: mousePos.y,
+          transform: "translate(-12px, -12px)",
+        }}
+      >
+        <ColorPickerIcon size={24} color={currentColor} />
+      </div>
+
       {currentDisplay && (
         <Magnifier
           x={mousePos.x}
