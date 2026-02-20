@@ -228,12 +228,15 @@ Explore window receives focus with updated history
 App
  ├─ Explore (Route: #/explore)
  │   └─ Glass container
- │       ├─ Icon
- │       ├─ Start Capture button
- │       ├─ Shortcut hint
- │       ├─ Hide button
- │       └─ Color History list
- │           └─ HEX value items (clickable)
+ │       ├─ Quit button (×)
+ │       ├─ Header (SPECTRA title)
+ │       ├─ Format selector (RGB/HEX/HSL)
+ │       └─ Color History list (collapsible)
+ │           └─ History items (clickable)
+ │               ├─ Drag handle (::)
+ │               ├─ Color swatch
+ │               ├─ Rain drop icon (colored)
+ │               └─ Formatted color value
  │
  └─ Capture (Route: #/capture)
      ├─ Fullscreen overlay

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Explore } from './screens/Explore';
+import Explore from './screens/Explore';
 import { Capture } from './screens/Capture';
 
 type Screen = 'explore' | 'capture';

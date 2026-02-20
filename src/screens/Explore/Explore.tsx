@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { formatColor, type ColorFormat } from "../shared/color";
-import "../styles/glass.css";
+import { formatColor, type ColorFormat } from "../../shared/color";
+import RainIcon from "../../components/ui/RainIcon";
+import "../../styles/glass.css";
 
 const MAX_HISTORY_ITEMS = 10;
 const COPY_FEEDBACK_DURATION = 1500;
@@ -8,7 +9,7 @@ const HISTORY_MIN_HEIGHT = 150;
 const HISTORY_MAX_HEIGHT = 180;
 const HISTORY_ITEM_HEIGHT = 50;
 
-export const Explore: React.FC = () => {
+const Explore: React.FC = () => {
   const [history, setHistory] = useState<ColorHistoryItem[]>([]);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(true);
@@ -187,11 +188,10 @@ export const Explore: React.FC = () => {
                         >
                           ::
                         </div>
-                        <div
-                          className="w-8 h-8 border border-command-border/30 flex-shrink-0"
-                          style={{ backgroundColor: item.hex }}
-                          role="img"
-                          aria-label={`Color swatch ${item.formatted}`}
+                        <RainIcon
+                          color={item.hex} 
+                          size={24} 
+                          className="flex-shrink-0"
                         />
                         <div className="flex-1 text-left">
                           <div className="text-xs font-bold text-command-text tracking-wide">
@@ -225,3 +225,5 @@ export const Explore: React.FC = () => {
     </div>
   );
 };
+
+export default Explore
