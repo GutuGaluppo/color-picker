@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Auto Commit Changes",
+  "description": "Automatically stages all changes and creates a commit when user types 'commit the changes'",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The user wants to commit changes. Check git status, stage all changes with 'git add -A', and create a meaningful commit message based on the changes. Then commit with that message."
+  }
+}
