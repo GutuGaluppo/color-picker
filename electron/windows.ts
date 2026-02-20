@@ -51,7 +51,7 @@ export function createExploreWindow(): BrowserWindow {
     alwaysOnTop: true,
     skipTaskbar: true,
     webPreferences: {
-      preload: path.join(__dirname, "index.js"),
+      preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -109,7 +109,7 @@ export function createCaptureWindow(): BrowserWindow {
     hasShadow: false, // ADD this
     enableLargerThanScreen: true, // ADD this for macOS
     webPreferences: {
-      preload: path.join(__dirname, "index.js"),
+      preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },

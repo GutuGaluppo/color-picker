@@ -5,12 +5,16 @@ import "../../styles/glass.css";
 import Header from "./Header";
 import ColorHistory from "./ColorHistory";
 import CloseButton from "../../components/ui/CloseButton";
+import DrawerTab from "./DrawerTab/DrawerTab";
+import Drawer from "./Drawer/Drawer";
+import ColorWheel from "./ColorWheel/ColorWheel";
 
 const Explore: React.FC = () => {
   const history = useColorHistory();
   const { copyFeedback, showCopyFeedback } = useCopyFeedback();
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(true);
   const [colorFormat, setColorFormat] = useState<ColorFormat>("hex");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     // Start capture mode immediately on mount
@@ -19,6 +23,12 @@ const Explore: React.FC = () => {
 
   const handleColorFormat = (format: ColorFormat) => {
     setColorFormat(format);
+  };
+
+  const handleColorWheelSelect = async (hex: string) => {
+    await window.electronAPI.addColorToHistory(hex);
+    await window.electronAPI.copyToClipboard(hex);
+    showCopyFeedback(hex);
   };
 
   return (
@@ -52,6 +62,19 @@ const Explore: React.FC = () => {
             ✓ COPIED {copyFeedback.toUpperCase()}
           </div>
         )}
+
+        {/* Color Wheel Drawer Tab */}
+        <DrawerTab
+          isOpen={isDrawerOpen}
+          onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+        />
+
+        {/* Color Wheel Drawer */}
+        <Drawer isOpen={isDrawerOpen}>
+          {isDrawerOpen && (
+            <ColorWheel size={240} onColorSelect={handleColorWheelSelect} />
+          )}
+        </Drawer>
       </div>
     </div>
   );
