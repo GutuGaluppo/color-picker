@@ -53,10 +53,17 @@ declare global {
       startCapture: () => void;
       closeExplore: () => void;
       cancelCapture: () => void;
+      quitApp: () => void;
       addColorToHistory: (hex: string) => Promise<void>;
       getColorHistory: () => Promise<ColorHistoryItem[]>;
       onDisplaysChanged: (callback: (displays: DisplayInfo[]) => void) => () => void;
       onHistoryUpdated: (callback: (history: ColorHistoryItem[]) => void) => () => void;
     };
+  }
+}
+
+declare module 'react' {
+  interface CSSProperties {
+    WebkitAppRegion?: 'drag' | 'no-drag';
   }
 }
