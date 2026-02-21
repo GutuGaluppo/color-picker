@@ -1,0 +1,8 @@
+.title {
+	font-size: 13px;
+	font-family: monospace;
+	letter-spacing: 0.05em;
+	font-weight: bold;
+	color: #1a1a1a;
+	transition: opacity 0.15s ease;
+}
