@@ -53,6 +53,7 @@ export interface ElectronAPI {
 	cancelCapture: () => void;
 	quitApp: () => void;
 	addColorToHistory: (hex: string) => Promise<void>;
+	deleteColorFromHistory: (timestamp: number) => Promise<void>;
 	setColorHistory: (history: ColorHistoryItem[]) => Promise<void>;
 	getColorHistory: () => Promise<ColorHistoryItem[]>;
 	onDisplaysChanged: (
@@ -75,6 +76,8 @@ const electronAPI: ElectronAPI = {
 	quitApp: () => ipcRenderer.send("quit-app"),
 	addColorToHistory: (hex: string) =>
 		ipcRenderer.invoke("add-color-to-history", hex),
+	deleteColorFromHistory: (timestamp: number) =>
+		ipcRenderer.invoke("delete-color-from-history", timestamp),
 	setColorHistory: (history: ColorHistoryItem[]) =>
 		ipcRenderer.invoke("set-color-history", history),
 	getColorHistory: () => ipcRenderer.invoke("get-color-history"),

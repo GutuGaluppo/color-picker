@@ -4,6 +4,7 @@ import { useFormattedHistory } from "../../../hooks";
 import RainIcon from "../../../components/ui/RainIcon";
 import listItemIcon from "../../../components/ui/drag-and-drop.png";
 import pantone from "../../../components/ui/pantone-colored.png";
+import trashIcon from "../../../components/ui/delete.png";
 import "./styles.css";
 
 const HISTORY_MIN_HEIGHT = 150;
@@ -16,6 +17,7 @@ interface ColorHistoryProps {
 	isExpanded: boolean;
 	onToggleExpanded: () => void;
 	onColorClick: (hex: string) => void;
+	deleteColorFromHistory: (timestamp: number) => void;
 }
 
 const ColorHistory: React.FC<ColorHistoryProps> = ({
@@ -24,6 +26,7 @@ const ColorHistory: React.FC<ColorHistoryProps> = ({
 	isExpanded,
 	onToggleExpanded,
 	onColorClick,
+	deleteColorFromHistory,
 }) => {
 	const formattedHistory = useFormattedHistory(history, colorFormat);
 
@@ -77,26 +80,38 @@ const ColorHistory: React.FC<ColorHistoryProps> = ({
 										className="flex items-center justify-between"
 										role="listitem"
 									>
-										<button
-											onClick={() => onColorClick(item.formatted)}
-											className="w-full flex items-center gap-3 px-2 py-2 hover:bg-command-hover transition-colors group border-b border-command-border/10"
-											aria-label={`Copy color ${item.formatted}`}
-										>
-											<img
-												src={listItemIcon}
-												className="w-4 h-4 flex-shrink-0 opacity-30 group-hover:opacity-100 transition-opacity"
-											/>
-											<RainIcon
-												color={item.hex}
-												size={24}
-												className="flex-shrink-0"
-											/>
-											<div className="flex-1 text-left">
-												<div className="text-sm font-bold text-command-text tracking-wide">
-													{item.formatted}
+										<div className="flex items-center gap-3 px-2 py-2 rounded group hover:bg-command-hover transition-colors w-full">
+											<button
+												onClick={() => onColorClick(item.formatted)}
+												className="w-full flex items-center gap-3 px-2 py-2 hover:bg-command-hover transition-colors group border-b border-command-border/10"
+												aria-label={`Copy color ${item.formatted}`}
+											>
+												<img
+													src={listItemIcon}
+													className="w-4 h-4 flex-shrink-0 opacity-30 group-hover:opacity-100 transition-opacity"
+												/>
+												<RainIcon
+													color={item.hex}
+													size={24}
+													className="flex-shrink-0"
+												/>
+												<div className="flex-1 text-left">
+													<div className="text-sm font-bold text-command-text tracking-wide">
+														{item.formatted}
+													</div>
 												</div>
-											</div>
-										</button>
+											</button>
+											<button
+												onClick={() => deleteColorFromHistory(item.timestamp)}
+												className="ml-2 p-1 rounded hover:bg-red-600/10 transition-colors"
+												aria-label={`Delete color ${item.formatted} from history`}
+											>
+												<img
+													src={trashIcon}
+													className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity"
+												/>
+											</button>
+										</div>
 									</li>
 								);
 							})}

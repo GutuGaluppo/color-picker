@@ -12,6 +12,7 @@ import {
 	getColorHistory,
 	resizeCaptureWindow,
 	setExploreWindowSize,
+	deleteColorFromHistory,
 } from "./windows";
 import {
 	registerGlobalShortcuts,
@@ -194,6 +195,13 @@ ipcMain.on("quit-app", () => {
 ipcMain.handle("add-color-to-history", async (_event, hex: string) => {
 	addColorToHistory(hex);
 });
+
+ipcMain.handle(
+	"delete-color-from-history",
+	async (_event, timestamp: number) => {
+		deleteColorFromHistory(timestamp);
+	},
+);
 
 ipcMain.handle("get-color-history", async () => {
 	return getColorHistory();

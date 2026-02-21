@@ -55,6 +55,7 @@ declare global {
 			cancelCapture: () => void;
 			quitApp: () => void;
 			addColorToHistory: (hex: string) => Promise<void>;
+			deleteColorFromHistory: (timestamp: number) => Promise<void>;
 			setColorHistory: (history: ColorHistoryItem[]) => Promise<void>;
 			getColorHistory: () => Promise<ColorHistoryItem[]>;
 			onDisplaysChanged: (

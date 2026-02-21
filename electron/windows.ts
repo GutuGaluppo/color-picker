@@ -210,6 +210,18 @@ export function addColorToHistory(hex: string): void {
 }
 
 /**
+ * Delete a specific color from history by timestamp value
+ */
+export function deleteColorFromHistory(timestamp: number): void {
+	windowState.colorHistory = windowState.colorHistory.filter(
+		(item) => item.timestamp !== timestamp,
+	);
+	if (exploreWindow && !exploreWindow.isDestroyed()) {
+		exploreWindow.webContents.send("history-updated", windowState.colorHistory);
+	}
+}
+
+/**
  * Set the color history
  */
 export function setColorHistory(history: ColorHistoryItem[]): void {

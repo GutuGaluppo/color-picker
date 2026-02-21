@@ -35,6 +35,10 @@ const Explore: React.FC = () => {
 		showCopyFeedback(hex);
 	};
 
+	const deleteColorFromHistory = async (timestamp: number) => {
+		await window.electronAPI.deleteColorFromHistory(timestamp);
+	};
+
 	const toggleDrawer = () => {
 		if (!isDrawerOpen) {
 			window.electronAPI.resizeExploreWindow(
@@ -82,6 +86,7 @@ const Explore: React.FC = () => {
 						isExpanded={isHistoryExpanded}
 						onToggleExpanded={() => setIsHistoryExpanded(!isHistoryExpanded)}
 						onColorClick={showCopyFeedback}
+						deleteColorFromHistory={deleteColorFromHistory}
 					/>
 				</div>
 
