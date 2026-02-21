@@ -4,6 +4,7 @@ import { rgbToHex, getPixelFromImageData } from "../shared/color";
 interface MagnifierProps {
   x: number;
   y: number;
+  virtualBounds: VirtualScreenBounds;
   displayCapture: DisplayCapture | null;
   onColorChange: (color: string) => void;
 }
@@ -18,6 +19,7 @@ const RADIUS = MAGNIFIER_SIZE / 2;
 export const Magnifier: React.FC<MagnifierProps> = ({
   x,
   y,
+  virtualBounds,
   displayCapture,
   onColorChange,
 }) => {
@@ -71,13 +73,18 @@ export const Magnifier: React.FC<MagnifierProps> = ({
       setCanvasError(false);
     }
 
-    // Convert screen coordinates to display-local coordinates
-    const localX = x - displayCapture.bounds.x;
-    const localY = y - displayCapture.bounds.y;
+    // x/y are window-relative; add virtualBounds offset to get absolute
+    // screen coords, then subtract the display's origin to get display-local.
+    const localX = (x + virtualBounds.x) - displayCapture.bounds.x;
+    const localY = (y + virtualBounds.y) - displayCapture.bounds.y;
 
-    // Apply scale factor for pixel sampling
-    const scaledX = localX * displayCapture.scaleFactor;
-    const scaledY = localY * displayCapture.scaleFactor;
+    // Derive pixel scale from actual captured dimensions rather than scaleFactor.
+    // Electron resizes thumbnails to fit within thumbnailSize, so the actual
+    // capture ratio (captured px / logical px) may differ from scaleFactor.
+    const xScale = displayCapture.width / displayCapture.bounds.width;
+    const yScale = displayCapture.height / displayCapture.bounds.height;
+    const scaledX = localX * xScale;
+    const scaledY = localY * yScale;
 
     ctx.clearRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE);
     ctx.imageSmoothingEnabled = false;

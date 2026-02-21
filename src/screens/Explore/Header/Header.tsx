@@ -18,7 +18,7 @@ export default function Header({
 		<div className="px-6 py-4 command-section">
 			<div className="flex items-end justify-between">
 				<div>
-					<div className="pb-4">
+					<div className="pb-4" style={{ WebkitAppRegion: "no-drag" }}>
 						<button
 							onClick={handleStartCapture}
 							className="w-5 h-5 text-white rounded-full transition-colors font-medium bg-command-accent cursor-pointer"

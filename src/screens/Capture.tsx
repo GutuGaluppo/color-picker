@@ -54,12 +54,15 @@ export const Capture: React.FC = () => {
 		loadScreenCapture();
 	}, []);
 
-	// Determine current display from cursor position
+	// Determine current display from cursor position.
+	// mousePos is window-relative (e.clientX/Y), but display.bounds are in
+	// absolute screen coords, so we offset by virtualBounds before comparing.
 	useEffect(() => {
 		if (captureData && mousePos) {
+			const { virtualBounds } = captureData;
 			const display = findDisplayAtPoint(
-				mousePos.x,
-				mousePos.y,
+				mousePos.x + virtualBounds.x,
+				mousePos.y + virtualBounds.y,
 				captureData.displays,
 			);
 			setCurrentDisplay(display);
@@ -136,10 +139,11 @@ export const Capture: React.FC = () => {
 				<ColorPickerIcon size={24} color={currentColor} />
 			</div>
 
-			{currentDisplay && (
+			{currentDisplay && captureData && (
 				<Magnifier
 					x={mousePos.x}
 					y={mousePos.y}
+					virtualBounds={captureData.virtualBounds}
 					displayCapture={currentDisplay}
 					onColorChange={setCurrentColor}
 				/>

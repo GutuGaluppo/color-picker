@@ -118,23 +118,45 @@ export async function captureAllDisplays(): Promise<MultiDisplayCapture> {
     console.log(`[Screen Capture] Source ${i}: name="${s.name}", size=${s.thumbnail.getSize().width}x${s.thumbnail.getSize().height}`);
   });
 
+  // Pre-sort sources by the trailing number in their name ("Screen 1" < "Screen 2").
+  // On macOS "Screen 1" is the primary display; this order matches the order in
+  // which we'll assign displays (primary first).
+  const sortedSources = [...sources].sort((a, b) => {
+    const aNum = parseInt(a.name.match(/\d+/)?.[0] ?? '999');
+    const bNum = parseInt(b.name.match(/\d+/)?.[0] ?? '999');
+    return aNum - bNum;
+  });
+
+  // Primary display first, then the rest in the order getAllDisplays() returned them.
+  const primaryId = screen.getPrimaryDisplay().id;
+  const sortedDisplayIds = [
+    primaryId,
+    ...displays.filter(d => d.id !== primaryId).map(d => d.id),
+  ];
+
   for (let i = 0; i < displays.length; i++) {
     const display = displays[i];
-    
-    // Try to match by source name first (e.g., "Screen 1" matches display with id 1)
+
+    // Method 1: parse the CGDirectDisplayID embedded in the source id
+    // (Electron formats it as "screen:DISPLAY_ID:N" on macOS).
     let matchingSource = sources.find(source => {
-      const match = source.name.match(/Screen (\d+)/);
-      if (match) {
-        const screenNumber = parseInt(match[1]);
-        return screenNumber === display.id;
-      }
-      return false;
+      const idMatch = source.id.match(/^screen:(\d+):/);
+      return idMatch ? parseInt(idMatch[1]) === display.id : false;
     });
 
-    // Fallback: match by index if name matching fails
+    // Method 2: map primary display → "Screen 1", others in appearance order.
+    if (!matchingSource) {
+      const orderIndex = sortedDisplayIds.indexOf(display.id);
+      if (orderIndex >= 0 && orderIndex < sortedSources.length) {
+        matchingSource = sortedSources[orderIndex];
+        console.log(`[Screen Capture] Matched display ${display.id} to source "${matchingSource.name}" by sorted order`);
+      }
+    }
+
+    // Last resort: raw index fallback.
     if (!matchingSource && i < sources.length) {
       matchingSource = sources[i];
-      console.log(`[Screen Capture] Matched display ${display.id} by index ${i}`);
+      console.log(`[Screen Capture] Matched display ${display.id} by raw index ${i}`);
     }
 
     if (matchingSource) {
