@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import CloseButton from "../../components/ui/CloseButton";
 import { useColorHistory, useCopyFeedback } from "../../hooks";
 import { type ColorFormat } from "../../shared/color";
@@ -19,11 +19,30 @@ const Explore: React.FC = () => {
 	const [isHistoryExpanded, setIsHistoryExpanded] = useState(true);
 	const [colorFormat, setColorFormat] = useState<ColorFormat>("hex");
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+	const [isCapturing, setIsCapturing] = useState(false);
 
 	useEffect(() => {
 		// Start capture mode immediately on mount
 		window.electronAPI.startCapture();
+		setIsCapturing(true);
 	}, []);
+
+	useEffect(() => {
+		return window.electronAPI.onCaptureEnded(() => {
+			setIsCapturing(false);
+		});
+	}, []);
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && isCapturing) {
+				window.electronAPI.cancelCapture();
+				setIsCapturing(false);
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isCapturing]);
 
 	const handleColorFormat = (format: ColorFormat) => {
 		setColorFormat(format);
@@ -34,6 +53,11 @@ const Explore: React.FC = () => {
 		await window.electronAPI.copyToClipboard(hex);
 		showCopyFeedback(hex);
 	};
+
+	const handleStartCapture = useCallback(() => {
+		window.electronAPI.startCapture();
+		setIsCapturing(true);
+	}, []);
 
 	const deleteColorFromHistory = async (timestamp: number) => {
 		await window.electronAPI.deleteColorFromHistory(timestamp);
@@ -78,6 +102,8 @@ const Explore: React.FC = () => {
 					<Header
 						colorFormat={colorFormat}
 						handleColorFormat={handleColorFormat}
+						isCapturing={isCapturing}
+						handleStartCapture={handleStartCapture}
 					/>
 
 					<ColorHistory

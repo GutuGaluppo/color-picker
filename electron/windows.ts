@@ -130,6 +130,9 @@ export function createCaptureWindow(): BrowserWindow {
 
 	captureWindow.on("closed", () => {
 		captureWindow = null;
+		if (exploreWindow && !exploreWindow.isDestroyed()) {
+			exploreWindow.webContents.send("capture-ended");
+		}
 	});
 
 	return captureWindow;

@@ -64,6 +64,7 @@ declare global {
 			onHistoryUpdated: (
 				callback: (history: ColorHistoryItem[]) => void,
 			) => () => void;
+			onCaptureEnded: (callback: () => void) => () => void;
 			resizeExploreWindow: (width: number, height: number) => Promise<void>;
 		};
 	}

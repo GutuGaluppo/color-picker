@@ -62,6 +62,7 @@ export interface ElectronAPI {
 	onHistoryUpdated: (
 		callback: (history: ColorHistoryItem[]) => void,
 	) => () => void;
+	onCaptureEnded: (callback: () => void) => () => void;
 	resizeExploreWindow: (width: number, height: number) => Promise<void>;
 }
 
@@ -109,6 +110,16 @@ const electronAPI: ElectronAPI = {
 		// Return cleanup function
 		return () => {
 			ipcRenderer.removeListener("history-updated", listener);
+		};
+	},
+	onCaptureEnded: (callback: () => void) => {
+		const listener = (_event: Electron.IpcRendererEvent) => {
+			callback();
+		};
+		ipcRenderer.on("capture-ended", listener);
+
+		return () => {
+			ipcRenderer.removeListener("capture-ended", listener);
 		};
 	},
 };

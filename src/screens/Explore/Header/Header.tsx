@@ -3,20 +3,33 @@ import "./styles.css";
 
 interface HeaderProps {
 	colorFormat: ColorFormat;
+	isCapturing: boolean;
 	handleColorFormat: (format: ColorFormat) => void;
+	handleStartCapture: () => void;
 }
 
 export default function Header({
 	colorFormat,
+	isCapturing,
 	handleColorFormat,
+	handleStartCapture,
 }: HeaderProps) {
 	return (
 		<div className="px-6 py-4 command-section">
 			<div className="flex items-end justify-between">
 				<div>
-					{/* <div className="text-xs text-slate-800 tracking-widest mb-1">
-						COLOR PICKER
-					</div> */}
+					<div className="pb-4">
+						<button
+							onClick={handleStartCapture}
+							className="w-5 h-5 text-white rounded-full transition-colors font-medium bg-command-accent cursor-pointer"
+							style={{
+								WebkitAppRegion: "no-drag",
+								backgroundColor: isCapturing ? "#15EA17" : "tomato",
+							}}
+						>
+							°
+						</button>
+					</div>
 					<h1 className="header-title" aria-label="Spectra Color Picker">
 						SPECTRA
 					</h1>
